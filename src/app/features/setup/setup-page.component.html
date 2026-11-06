@@ -1,0 +1,72 @@
+<section class="page-header">
+  <p class="eyebrow">NEW CONNECTION</p>
+  <h1>Add an instance</h1>
+  <p>Generate a command, run it on the target machine, and keep this page open until its first metric arrives.</p>
+</section>
+
+<section class="setup-panel">
+  <form [formGroup]="form" (ngSubmit)="generateCommand()" novalidate>
+    <fieldset [disabled]="phase() !== 'idle'">
+      <label for="instance-name">Instance name</label>
+      <input id="instance-name" type="text" formControlName="name" placeholder="Production server" />
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <small class="field-error">Enter an instance name.</small>
+      }
+
+      <label for="platform">Operating system</label>
+      <select id="platform" formControlName="platform">
+        <option value="linux">Linux (systemd, x64)</option>
+        <option value="windows">Windows (x64)</option>
+      </select>
+
+      <button class="primary-button" type="submit">Generate install command</button>
+    </fieldset>
+  </form>
+</section>
+
+@if (command()) {
+  <section class="command-panel" aria-labelledby="command-heading">
+    <div class="command-heading">
+      <div>
+        <p class="eyebrow">AGENT {{ agentId() }}</p>
+        <h2 id="command-heading">Install Telemetry Collector v1.0.4</h2>
+      </div>
+      <a class="secondary-button release-link" [href]="releasePage" target="_blank" rel="noopener noreferrer">Open release</a>
+    </div>
+
+    @if (form.controls.platform.value === 'linux') {
+      <p class="compatibility-note"><strong>Linux release note:</strong> v1.0.4 does not use the supplied Agent ID in its metrics. Automatic setup completion on Linux needs an agent release with stable Agent ID support.</p>
+    }
+
+    <label for="install-command">Run this command in an elevated terminal</label>
+    <textarea id="install-command" readonly rows="7" [value]="command()"></textarea>
+    <div class="command-actions">
+      <button type="button" class="primary-button" (click)="copyCommand()" [disabled]="phase() === 'connecting' || phase() === 'waiting' || phase() === 'saving'">
+        {{ copied() ? 'Copied - waiting for agent' : 'Copy command and wait' }}
+      </button>
+      @if (phase() === 'generated' && copied() === false) {
+        <button type="button" class="secondary-button" (click)="startWaiting()">I copied it manually</button>
+      }
+    </div>
+
+    @if (error()) {
+      <p class="form-error" role="alert">{{ error() }}</p>
+    }
+
+    @if (phase() === 'connecting') {
+      <p class="progress-message">Connecting to the SignalR group for this Agent ID...</p>
+    } @else if (phase() === 'waiting') {
+      <p class="progress-message">Connected. Run the command above. The instance will be saved after the first matching metric arrives.</p>
+    } @else if (phase() === 'saving') {
+      <p class="progress-message">First metric received. Saving the instance to your account...</p>
+    } @else if (phase() === 'save-error') {
+      <button type="button" class="secondary-button" (click)="retrySave()">Retry saving instance</button>
+    } @else if (phase() === 'stream-error') {
+      <button type="button" class="secondary-button" (click)="startWaiting()">Reconnect and wait</button>
+    }
+  </section>
+}
+
+<aside class="info-note">
+  You must be signed in to use agent setup. The Auth API instance record is created only after the first metric with this Agent ID reaches the Hub.
+</aside>

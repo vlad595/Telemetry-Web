@@ -1,0 +1,61 @@
+<main class="auth-page">
+  <section class="auth-card" aria-labelledby="auth-title">
+    <a class="wordmark" href="/auth" aria-label="Telemetry home">Telemetry</a>
+    <p class="eyebrow">SYSTEM MONITORING</p>
+    <h1 id="auth-title">{{ mode() === 'login' ? 'Welcome back' : 'Create your account' }}</h1>
+    <p class="intro">Sign in to view your monitored instances.</p>
+
+    <div class="tabs" role="tablist" aria-label="Authentication">
+      <button type="button" role="tab" [attr.aria-selected]="mode() === 'login'" [class.active]="mode() === 'login'" (click)="selectMode('login')">Login</button>
+      <button type="button" role="tab" [attr.aria-selected]="mode() === 'register'" [class.active]="mode() === 'register'" (click)="selectMode('register')">Register</button>
+    </div>
+
+    @if (error()) {
+      <p class="form-error" role="alert">{{ error() }}</p>
+    }
+
+    @if (mode() === 'login') {
+      <form [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
+        <label for="login-email">Email</label>
+        <input id="login-email" type="email" autocomplete="email" formControlName="email" />
+        @if (loginForm.controls.email.touched && loginForm.controls.email.invalid) {
+          <small class="field-error">Enter a valid email address.</small>
+        }
+
+        <label for="login-password">Password</label>
+        <input id="login-password" type="password" autocomplete="current-password" formControlName="password" />
+        @if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
+          <small class="field-error">Password is required.</small>
+        }
+
+        <button class="primary-button submit-button" type="submit" [disabled]="busy()">
+          {{ busy() ? 'Signing in...' : 'Sign in' }}
+        </button>
+      </form>
+    } @else {
+      <form [formGroup]="registerForm" (ngSubmit)="submit()" novalidate>
+        <label for="register-name">Name</label>
+        <input id="register-name" type="text" autocomplete="name" formControlName="userName" />
+        @if (registerForm.controls.userName.touched && registerForm.controls.userName.invalid) {
+          <small class="field-error">Name is required.</small>
+        }
+
+        <label for="register-email">Email</label>
+        <input id="register-email" type="email" autocomplete="email" formControlName="email" />
+        @if (registerForm.controls.email.touched && registerForm.controls.email.invalid) {
+          <small class="field-error">Enter a valid email address.</small>
+        }
+
+        <label for="register-password">Password</label>
+        <input id="register-password" type="password" autocomplete="new-password" formControlName="password" />
+        @if (registerForm.controls.password.touched && registerForm.controls.password.invalid) {
+          <small class="field-error">Password is required.</small>
+        }
+
+        <button class="primary-button submit-button" type="submit" [disabled]="busy()">
+          {{ busy() ? 'Creating account...' : 'Create account' }}
+        </button>
+      </form>
+    }
+  </section>
+</main>

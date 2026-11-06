@@ -1,0 +1,152 @@
+.page-header {
+  margin-bottom: 26px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 8px;
+  font-size: 28px;
+}
+
+.page-header > p:last-child,
+.help-text {
+  color: var(--muted);
+}
+
+.setup-panel,
+.command-panel {
+  max-width: 720px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+form {
+  display: grid;
+  gap: 10px;
+}
+
+fieldset {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+label {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+
+.field-error,
+.form-error {
+  color: var(--danger);
+}
+
+.form-error {
+  margin: 4px 0;
+}
+
+.info-note {
+  max-width: 720px;
+  margin: 16px 0 26px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.command-panel {
+  margin-top: 24px;
+}
+
+.command-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.command-heading h2 {
+  margin-bottom: 0;
+  font-size: 19px;
+}
+
+.command-panel textarea {
+  min-height: 100px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+}
+
+.command-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.release-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.compatibility-note {
+  padding: 12px;
+  border-left: 3px solid var(--danger);
+  background: var(--surface);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.progress-message {
+  margin: 16px 0 0;
+  color: var(--accent);
+  line-height: 1.5;
+}
+
+.help-text {
+  margin: 12px 0 0;
+  font-size: 12px;
+}
+
+@media (max-width: 560px) {
+  .setup-panel,
+  .command-panel {
+    padding: 16px;
+  }
+
+  .command-heading {
+    align-items: flex-start;
+  }
+}

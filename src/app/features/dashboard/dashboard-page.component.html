@@ -1,0 +1,111 @@
+<section class="page-header">
+  <div>
+    <p class="eyebrow">LIVE MONITORING</p>
+    <h1>Dashboard</h1>
+    <p>Current metrics for a connected instance.</p>
+  </div>
+  @if (instances().length > 0) {
+    <label class="instance-picker">
+      <span>Instance</span>
+      <select [value]="selectedId()" (change)="selectInstance($event)">
+        @for (instance of instances(); track instance.id) {
+          <option [value]="instance.id">{{ instance.name }}</option>
+        }
+      </select>
+    </label>
+  }
+</section>
+
+<div class="stream-status" [attr.data-status]="status()">
+  <span class="status-dot"></span>
+  SignalR {{ status() }}
+</div>
+
+@if (loading()) {
+  <p class="notice">Loading instances...</p>
+} @else if (error()) {
+  <p class="notice error" role="alert">{{ error() }}</p>
+} @else if (instances().length === 0) {
+  <section class="empty-state">
+    <h2>No instances yet</h2>
+    <p>Create an instance and install its collector to start receiving metrics.</p>
+    <a class="primary-button link-button" routerLink="/setup">Add an instance</a>
+  </section>
+} @else if (status() === 'error') {
+  <section class="empty-state">
+    <h2>Could not connect to the metrics stream</h2>
+    <p>Check that the Telemetry API SignalR Hub is running at the configured address.</p>
+  </section>
+}
+
+@if (!loading() && !error() && instances().length > 0 && status() !== 'error' && !snapshot().machine && !snapshot().api && !snapshot().database) {
+  <section class="empty-state">
+    <h2>Waiting for metrics</h2>
+    <p>Metrics will appear here as soon as the selected instance publishes them.</p>
+  </section>
+}
+
+@if (snapshot().machine; as machine) {
+  <section class="metric-section" aria-labelledby="machine-heading">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">SERVER</p>
+        <h2 id="machine-heading">Machine load</h2>
+      </div>
+      <span class="updated">{{ machine.timestamp | date: 'mediumTime' }}</span>
+    </div>
+    <div class="metric-grid machine-grid">
+      <article class="metric-card chart-card">
+        <div class="metric-topline"><span>CPU</span><strong>{{ percent(machine.cpuLoad) }}%</strong></div>
+        <svg viewBox="0 0 100 32" preserveAspectRatio="none" role="img" aria-label="CPU load history">
+          <polyline [attr.points]="points(snapshot().cpuHistory)" />
+        </svg>
+        <small>{{ machine.cpuName }}</small>
+      </article>
+      <article class="metric-card chart-card">
+        <div class="metric-topline"><span>Memory</span><strong>{{ percent(machine.ramLoad) }}%</strong></div>
+        <svg viewBox="0 0 100 32" preserveAspectRatio="none" role="img" aria-label="Memory load history">
+          <polyline [attr.points]="points(snapshot().ramHistory)" />
+        </svg>
+        <small>{{ machine.totalRam | number }} MB total</small>
+      </article>
+      <article class="metric-card chart-card">
+        <div class="metric-topline"><span>Free disk</span><strong>{{ machine.freeDiskSpace | number }} MB</strong></div>
+        <svg viewBox="0 0 100 32" preserveAspectRatio="none" role="img" aria-label="Free disk history">
+          <polyline [attr.points]="points(snapshot().diskHistory)" />
+        </svg>
+        <small>Read {{ bytesPerSecond(machine.readingSpeed) }} | Write {{ bytesPerSecond(machine.writingSpeed) }}</small>
+      </article>
+    </div>
+  </section>
+}
+
+@if (snapshot().api; as api) {
+  <section class="metric-section" aria-labelledby="api-heading">
+    <div class="section-heading">
+      <div><p class="eyebrow">API</p><h2 id="api-heading">Request metrics</h2></div>
+      <span class="updated">{{ api.timestamp | date: 'mediumTime' }}</span>
+    </div>
+    <div class="metric-grid">
+      <article class="metric-card compact-card"><span>Requests / sec</span><strong>{{ api.rps | number }}</strong><small>{{ api.environment }}</small></article>
+      <article class="metric-card compact-card"><span>Latency</span><strong>{{ api.latency | number: '1.0-2' }} ms</strong><small>{{ api.connectionCount | number }} connections</small></article>
+      <article class="metric-card compact-card"><span>Client errors</span><strong>{{ api.clientErrorCount | number }}</strong><small>4xx responses</small></article>
+      <article class="metric-card compact-card"><span>Server errors</span><strong>{{ api.serverErrorCount | number }}</strong><small>5xx responses</small></article>
+    </div>
+  </section>
+}
+
+@if (snapshot().database; as database) {
+  <section class="metric-section" aria-labelledby="database-heading">
+    <div class="section-heading">
+      <div><p class="eyebrow">DATABASE</p><h2 id="database-heading">Database metrics</h2></div>
+      <span class="updated">{{ database.timestamp | date: 'mediumTime' }}</span>
+    </div>
+    <div class="metric-grid">
+      <article class="metric-card compact-card"><span>Connections</span><strong>{{ database.connectionsCount | number }}</strong><small>{{ database.environment }}</small></article>
+      <article class="metric-card compact-card"><span>Query latency</span><strong>{{ database.queryLatency | number: '1.0-2' }} ms</strong><small>Latest sample</small></article>
+      <article class="metric-card compact-card"><span>Slow queries</span><strong>{{ database.slowQueriesCount | number }}</strong><small>Current sample</small></article>
+      <article class="metric-card compact-card"><span>Deadlocks</span><strong>{{ database.deadlocksCount | number }}</strong><small>Current sample</small></article>
+    </div>
+  </section>
+}
