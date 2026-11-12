@@ -2,7 +2,7 @@
   <header class="page-heading">
     <p class="eyebrow">NOTIFICATIONS</p>
     <h1>Telegram</h1>
-    <p class="muted">Connect the bot to receive alerts about your instances.</p>
+    <p class="muted">Choose which metric readings should send alerts to your Telegram chat.</p>
   </header>
 
   <div class="connection-card">
@@ -27,7 +27,7 @@
 
     @if (!loading()) {
       @if (connected()) {
-        <p>Alerts for your instances and workspaces can now be sent to your Telegram chat.</p>
+        <p>Metrics from your instances and workspaces can trigger the rules below.</p>
         <button type="button" class="secondary-button" [disabled]="busy()" (click)="disconnect()">Disconnect Telegram</button>
       } @else {
         <ol class="steps">
@@ -47,4 +47,66 @@
       }
     }
   </div>
+
+  <section class="rules-card" aria-labelledby="rules-heading">
+    <div class="rules-heading">
+      <div>
+        <h2 id="rules-heading">Alert rules</h2>
+        <p class="muted">An alert is sent when any one of your rules matches a metric reading.</p>
+      </div>
+      @if (!loading()) {
+        <span class="rule-count">{{ rules().length }} {{ rules().length === 1 ? 'rule' : 'rules' }}</span>
+      }
+    </div>
+
+    <form class="rule-form" (ngSubmit)="addRule()">
+      <label>
+        <span>Metric field</span>
+        <select name="field" [(ngModel)]="selectedField" [disabled]="loading() || rulesBusy()">
+          @for (field of fieldOptions; track field.value) {
+            <option [value]="field.value">{{ field.label }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Condition</span>
+        <select name="operator" [(ngModel)]="selectedOperator" [disabled]="loading() || rulesBusy()">
+          @for (operator of operators; track operator) {
+            <option [value]="operator">{{ operator }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Value</span>
+        <input name="threshold" type="number" step="any" required placeholder="e.g. 80"
+          [(ngModel)]="threshold" [disabled]="loading() || rulesBusy()" />
+      </label>
+      <button class="primary-button" type="submit" [disabled]="loading() || rulesBusy() || threshold === null">
+        {{ rulesBusy() ? 'Saving...' : 'Add rule' }}
+      </button>
+    </form>
+
+    @if (ruleError()) {
+      <p class="feedback error" role="alert">{{ ruleError() }}</p>
+    }
+    @if (ruleMessage()) {
+      <p class="feedback" role="status">{{ ruleMessage() }}</p>
+    }
+
+    @if (loading()) {
+      <p class="muted">Loading rules...</p>
+    } @else if (rules().length === 0) {
+      <p class="empty-rules">No rules yet. Add one above to start filtering notifications.</p>
+    } @else {
+      <ul class="rule-list">
+        @for (rule of rules(); track rule) {
+          <li>
+            <code>{{ rule }}</code>
+            <button type="button" class="secondary-button" [disabled]="rulesBusy()"
+              [attr.aria-label]="'Remove rule ' + rule" (click)="removeRule(rule)">Remove</button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
 </section>

@@ -19,13 +19,13 @@ src/app/
 
 ## Local development
 
-Run the Auth API, Telemetry API Hub, and ingestion API, then start the web client:
+Start the web client:
 
 ```bash
 npm start
 ```
 
-The dev-server proxy forwards `/auth-api` to the Auth API HTTP endpoint at `localhost:5068` and `/telemetry-hub` to the Hub at `localhost:5154`. Run the Auth API with its `http` launch profile, or update the proxy target to `https://localhost:7158` when using its `https` profile. Adjust `proxy.conf.json` and `src/environments/environment.ts` when local service ports change. The Setup page defaults the agent's ingestion URL to `http://localhost:5289/api/telemetry/ingest`.
+The client uses the public `https://4-227-156-160.sslip.io/` endpoint for Telemetry API, `/auth/` for Auth API, `/analytics/` for Analytics API, and `/ingestion/` for ingestion. The Setup page passes `https://4-227-156-160.sslip.io/ingestion/api/telemetry/ingest` to the collector. To use local services instead, update `src/environments/environment.ts` and `proxy.conf.json` together.
 
 The authenticated API routes use the Auth API endpoints `/api/user/login`, `/api/user/reg`, `/api/user/me`, `/api/instance`, and `/api/workspace`. The header loads `/api/workspace/my`, creates workspaces with `POST /api/workspace`, and joins them with `POST /api/workspace/accept-invite={code}`. Workspace selection is persisted in local storage and filters the dashboard instance list. JWTs are stored in browser local storage and attached as Bearer tokens by the HTTP interceptor.
 
@@ -37,4 +37,4 @@ The dashboard joins the Hub group for a selected instance with `EnterGroup(insta
 
 - The current collector setup contract provides an `AgentId`/instance ID. The Auth API persists the instance only after the first matching metric arrives.
 - Release `v1.0.4`'s Windows collector uses the supplied Agent ID. Its Linux collector generates a new `instanceId` for every sample, so the Linux binary must be rebuilt and released with the stable-ID source change before this automatic setup flow can complete on Linux.
-- For production, set the Auth API, ingestion API, and Hub URLs for the deployment and configure the deployment reverse proxy/CORS rules to route those services.
+- The public reverse proxy must forward `/auth/`, `/analytics/`, and `/ingestion/` to their respective services and `/mainhub` to Telemetry API.

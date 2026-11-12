@@ -1,16 +1,16 @@
 {
   "/auth-api": {
-    "target": "http://localhost:5068",
+    "target": "https://4-227-156-160.sslip.io",
     "changeOrigin": true,
-    "pathRewrite": { "^/auth-api": "" }
+    "pathRewrite": { "^/auth-api": "/auth" }
   },
   "/analytics-api": {
-    "target": "http://localhost:5021",
+    "target": "https://4-227-156-160.sslip.io",
     "changeOrigin": true,
-    "pathRewrite": { "^/analytics-api": "" }
+    "pathRewrite": { "^/analytics-api": "/analytics" }
   },
   "/telemetry-hub": {
-    "target": "http://localhost:5154",
+    "target": "https://4-227-156-160.sslip.io",
     "changeOrigin": true,
     "ws": true,
     "pathRewrite": { "^/telemetry-hub": "" }

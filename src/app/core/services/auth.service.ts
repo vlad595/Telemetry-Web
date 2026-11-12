@@ -1,9 +1,9 @@
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
-import { map, Observable, tap } from 'rxjs';
+import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, LoginRequest, RegisterRequest, UserContext } from '../models/auth.models';
+import { AlertRuleResponse, AuthResponse, LoginRequest, RegisterRequest, UserContext } from '../models/auth.models';
 
 const TOKEN_STORAGE_KEY = 'telemetry.jwt';
 
@@ -39,8 +39,16 @@ export class AuthService {
     );
   }
 
-  disconnectTelegram(): Observable<UserContext> {
-    return this.http.delete<UserContext>(`${this.baseUrl}/api/user/telegram/delete-connection`);
+  telegramConnection(userId: string): Observable<AlertRuleResponse | null> {
+    return this.http.get<AlertRuleResponse>(`${this.baseUrl}/api/user/telegram/user=${encodeURIComponent(userId)}`).pipe(
+      catchError((error: unknown) => error instanceof HttpErrorResponse && error.status === 404
+        ? of(null)
+        : throwError(() => error)),
+    );
+  }
+
+  disconnectTelegram(): Observable<AlertRuleResponse> {
+    return this.http.delete<AlertRuleResponse>(`${this.baseUrl}/api/user/telegram/delete-connection`);
   }
 
   token(): string | null {

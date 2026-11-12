@@ -11,12 +11,18 @@ export interface UserContext {
   id: string;
   userName: string;
   email: string;
-  telegramChatId: string;
   subscriptionLevel: number;
 }
 
 export interface AuthResponse extends UserContext {
   token: string;
+}
+
+export interface AlertRuleResponse {
+  id: string;
+  userId: string;
+  telegramChatId: string | null;
+  rules: string[];
 }
 
 export interface Instance {

@@ -64,7 +64,7 @@ export class SetupPageComponent implements OnInit, OnDestroy {
     const values = this.form.getRawValue();
     const id = crypto.randomUUID();
     this.agentId.set(id);
-    this.command.set(buildInstallCommand(values.platform, 'http://localhost:5289/api/telemetry/ingest', id));
+    this.command.set(buildInstallCommand(values.platform, environment.ingestionApiUrl, id));
     this.phase.set('generated');
   }
 
