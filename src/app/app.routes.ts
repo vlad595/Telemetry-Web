@@ -33,6 +33,10 @@ export const routes: Routes = [
         path: 'telegram',
         loadComponent: () => import('./features/telegram/telegram-page.component').then((module) => module.TelegramPageComponent),
       },
+      {
+        path: 'plan',
+        loadComponent: () => import('./features/plan/plan-page.component').then((module) => module.PlanPageComponent),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

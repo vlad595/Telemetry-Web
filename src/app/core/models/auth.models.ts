@@ -7,11 +7,17 @@ export interface RegisterRequest extends LoginRequest {
   userName: string;
 }
 
+export enum SubscriptionTier {
+  Tier1 = 0,
+  Tier2 = 1,
+  Tier3 = 2,
+}
+
 export interface UserContext {
   id: string;
   userName: string;
   email: string;
-  subscriptionLevel: number;
+  subscriptionLevel: SubscriptionTier;
 }
 
 export interface AuthResponse extends UserContext {

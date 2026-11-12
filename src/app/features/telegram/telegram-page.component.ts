@@ -2,14 +2,16 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { finalize, forkJoin, switchMap } from 'rxjs';
+import { RouterLink } from '@angular/router';
+import { finalize, forkJoin, of, switchMap } from 'rxjs';
+import { SubscriptionTier } from '../../core/models/auth.models';
 import { AlertRulesService } from '../../core/services/alert-rules.service';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-telegram-page',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './telegram-page.component.html',
   styleUrl: './telegram-page.component.css',
 })
@@ -19,6 +21,7 @@ export class TelegramPageComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly loading = signal(true);
+  readonly notificationsAvailable = signal<boolean | null>(null);
   readonly busy = signal(false);
   readonly connected = signal(false);
   readonly link = signal('');
@@ -54,15 +57,25 @@ export class TelegramPageComponent implements OnInit {
     this.error.set('');
     this.loading.set(true);
     this.auth.currentUser().pipe(
-      switchMap((user) => forkJoin({
-        connection: this.auth.telegramConnection(user.id),
-        rules: this.alertRules.list(),
-      })),
+      switchMap((user) => {
+        const available = user.subscriptionLevel !== SubscriptionTier.Tier3;
+        this.notificationsAvailable.set(available);
+        return available ? forkJoin({
+          connection: this.auth.telegramConnection(user.id),
+          rules: this.alertRules.list(),
+        }) : of({ connection: null, rules: [] });
+      }),
       finalize(() => this.loading.set(false)),
       takeUntilDestroyed(this.destroyRef),
     )
       .subscribe({
         next: ({ connection, rules }) => {
+          if (this.notificationsAvailable() === false) {
+            this.connected.set(false);
+            this.rules.set([]);
+            this.message.set('');
+            return;
+          }
           const isConnected = !!connection?.telegramChatId;
           this.connected.set(isConnected);
           this.rules.set(rules);

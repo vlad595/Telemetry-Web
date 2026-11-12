@@ -5,6 +5,13 @@
     <p class="muted">Choose which metric readings should send alerts to your Telegram chat.</p>
   </header>
 
+  @if (!loading() && notificationsAvailable() === false) {
+    <div class="connection-card">
+      <h2>Notifications are available on Tier 2 and Tier 1</h2>
+      <p class="muted">Upgrade your plan to connect Telegram and receive alerts based on your rules.</p>
+      <a class="primary-button link-button" routerLink="/plan">View plans</a>
+    </div>
+  } @else {
   <div class="connection-card">
     <div class="status-row">
       <div>
@@ -109,4 +116,5 @@
       </ul>
     }
   </section>
+  }
 </section>

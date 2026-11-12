@@ -3,7 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AlertRuleResponse, AuthResponse, LoginRequest, RegisterRequest, UserContext } from '../models/auth.models';
+import { AlertRuleResponse, AuthResponse, LoginRequest, RegisterRequest, SubscriptionTier, UserContext } from '../models/auth.models';
 
 const TOKEN_STORAGE_KEY = 'telemetry.jwt';
 
@@ -27,6 +27,14 @@ export class AuthService {
 
   currentUser(): Observable<UserContext> {
     return this.http.get<UserContext>(`${this.baseUrl}/api/user/me`);
+  }
+
+  upgradePlan(tier: SubscriptionTier): Observable<UserContext> {
+    return this.http.patch<UserContext>(`${this.baseUrl}/api/user/plan/upgrade=${tier}`, null);
+  }
+
+  downgradePlan(tier: SubscriptionTier): Observable<UserContext> {
+    return this.http.patch<UserContext>(`${this.baseUrl}/api/user/plan/downgrade=${tier}`, null);
   }
 
   generateTelegramLink(): Observable<string> {

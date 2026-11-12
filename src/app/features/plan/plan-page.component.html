@@ -1,0 +1,43 @@
+<section class="plan-page">
+  <header class="page-heading">
+    <p class="eyebrow">SUBSCRIPTION</p>
+    <h1>Plan</h1>
+    <p class="muted">Choose the level of monitoring and analytics that fits your needs.</p>
+  </header>
+
+  @if (loading()) {
+    <p class="feedback" role="status">Loading your plan...</p>
+  }
+  @if (error()) {
+    <p class="feedback error" role="alert">{{ error() }}</p>
+  }
+  @if (message()) {
+    <p class="feedback success" role="status">{{ message() }}</p>
+  }
+
+  <div class="plan-grid">
+    @for (plan of plans; track plan.tier) {
+      <article class="plan-card" [class.current]="currentTier() === plan.tier">
+        <div class="card-heading">
+          <div>
+            <h2>{{ plan.title }}</h2>
+            <p class="muted">{{ plan.summary }}</p>
+          </div>
+          @if (currentTier() === plan.tier) {
+            <span class="current-badge">Current</span>
+          }
+        </div>
+        <ul>
+          @for (feature of plan.features; track feature) {
+            <li>{{ feature }}</li>
+          }
+        </ul>
+        <button type="button" class="primary-button" [class.secondary-button]="currentTier() === plan.tier"
+          [disabled]="loading() || savingTier() !== null || currentTier() === null || currentTier() === plan.tier"
+          (click)="changePlan(plan.tier)">
+          {{ savingTier() === plan.tier ? 'Updating...' : actionLabel(plan.tier) }}
+        </button>
+      </article>
+    }
+  </div>
+</section>
