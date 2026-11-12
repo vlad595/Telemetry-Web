@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, distinctUntilChanged, from, of, startWith, switchMap, tap } from 'rxjs';
@@ -8,11 +8,12 @@ import { EMPTY_METRICS, MetricsGroupingService } from '../../core/services/metri
 import { InstanceService } from '../../core/services/instance.service';
 import { MetricsStreamService } from '../../core/services/metrics-stream.service';
 import { WorkspaceService } from '../../core/services/workspace.service';
+import { LiveMetricChartComponent } from './live-metric-chart.component';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, RouterLink],
+  imports: [DatePipe, DecimalPipe, RouterLink, LiveMetricChartComponent],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.css',
 })
@@ -31,6 +32,9 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
   readonly error = signal('');
   readonly status = this.stream.status;
   readonly snapshot = toSignal(this.grouping.group(this.stream.events$), { initialValue: EMPTY_METRICS });
+  readonly coreIds = computed(() => (this.snapshot().machine?.cpuCoreLoads ?? [])
+    .map((core) => core.coreId)
+    .sort((left, right) => left.localeCompare(right, undefined, { numeric: true })));
 
   ngOnInit(): void {
     this.workspaceId$
@@ -90,25 +94,4 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     else void this.stream.disconnect();
   }
 
-  percent(value: number): number {
-    return Math.round(value * 100);
-  }
-
-  points(values: number[]): string {
-    if (values.length === 0) return '0,30 100,30';
-    const max = Math.max(1, ...values);
-    return values
-      .map((value, index) => {
-        const x = values.length === 1 ? 50 : (index / (values.length - 1)) * 100;
-        const y = 30 - (value / max) * 26;
-        return `${x},${y}`;
-      })
-      .join(' ');
-  }
-
-  bytesPerSecond(value: number): string {
-    if (value >= 1024 * 1024) return `${(value / (1024 * 1024)).toFixed(1)} MB/s`;
-    if (value >= 1024) return `${(value / 1024).toFixed(1)} KB/s`;
-    return `${Math.round(value)} B/s`;
-  }
 }

@@ -3,24 +3,20 @@ import { Observable, scan } from 'rxjs';
 import { ApiMetrics, DbMetrics, MachineMetrics, TelemetryMetric } from '../models/telemetry.models';
 import { MetricEvent } from './metrics-stream.service';
 
-const HISTORY_LIMIT = 30;
+const HISTORY_LIMIT = 120;
 
 export interface MetricsSnapshot {
   machine: MachineMetrics | null;
   api: ApiMetrics | null;
   database: DbMetrics | null;
-  cpuHistory: number[];
-  ramHistory: number[];
-  diskHistory: number[];
+  machineHistory: MachineMetrics[];
 }
 
 export const EMPTY_METRICS: MetricsSnapshot = {
   machine: null,
   api: null,
   database: null,
-  cpuHistory: [],
-  ramHistory: [],
-  diskHistory: [],
+  machineHistory: [],
 };
 
 @Injectable({ providedIn: 'root' })
@@ -35,9 +31,7 @@ export class MetricsGroupingService {
           return {
             ...snapshot,
             machine: metric,
-            cpuHistory: append(snapshot.cpuHistory, metric.cpuLoad),
-            ramHistory: append(snapshot.ramHistory, metric.ramLoad),
-            diskHistory: append(snapshot.diskHistory, metric.freeDiskSpace),
+            machineHistory: append(snapshot.machineHistory, metric),
           };
         }
         if (isApiMetric(metric)) return { ...snapshot, api: metric };
@@ -47,7 +41,7 @@ export class MetricsGroupingService {
   }
 }
 
-function append(history: number[], value: number): number[] {
+function append(history: MachineMetrics[], value: MachineMetrics): MachineMetrics[] {
   return [...history, value].slice(-HISTORY_LIMIT);
 }
 

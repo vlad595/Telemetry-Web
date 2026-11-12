@@ -50,32 +50,45 @@
     <div class="section-heading">
       <div>
         <p class="eyebrow">SERVER</p>
-        <h2 id="machine-heading">Machine load</h2>
+        <h2 id="machine-heading">Live machine metrics</h2>
+        <p class="section-description">Recent samples from the selected instance. Charts start when new metrics arrive.</p>
       </div>
       <span class="updated">{{ machine.timestamp | date: 'mediumTime' }}</span>
     </div>
-    <div class="metric-grid machine-grid">
-      <article class="metric-card chart-card">
-        <div class="metric-topline"><span>CPU</span><strong>{{ percent(machine.cpuLoad) }}%</strong></div>
-        <svg viewBox="0 0 100 32" preserveAspectRatio="none" role="img" aria-label="CPU load history">
-          <polyline [attr.points]="points(snapshot().cpuHistory)" />
-        </svg>
-        <small>{{ machine.cpuName }}</small>
-      </article>
-      <article class="metric-card chart-card">
-        <div class="metric-topline"><span>Memory</span><strong>{{ percent(machine.ramLoad) }}%</strong></div>
-        <svg viewBox="0 0 100 32" preserveAspectRatio="none" role="img" aria-label="Memory load history">
-          <polyline [attr.points]="points(snapshot().ramHistory)" />
-        </svg>
-        <small>{{ machine.totalRam | number }} MB total</small>
-      </article>
-      <article class="metric-card chart-card">
-        <div class="metric-topline"><span>Free disk</span><strong>{{ machine.freeDiskSpace | number }} MB</strong></div>
-        <svg viewBox="0 0 100 32" preserveAspectRatio="none" role="img" aria-label="Free disk history">
-          <polyline [attr.points]="points(snapshot().diskHistory)" />
-        </svg>
-        <small>Read {{ bytesPerSecond(machine.readingSpeed) }} | Write {{ bytesPerSecond(machine.writingSpeed) }}</small>
-      </article>
+    <div class="live-chart-grid">
+      <app-live-metric-chart kind="cpu" [history]="snapshot().machineHistory" />
+      <app-live-metric-chart kind="ram" [history]="snapshot().machineHistory" />
+      <app-live-metric-chart kind="sockets" [history]="snapshot().machineHistory" />
+    </div>
+  </section>
+
+  @if (coreIds().length > 0) {
+    <section class="metric-section" aria-labelledby="cores-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">PROCESSOR</p>
+          <h2 id="cores-heading">CPU cores</h2>
+        </div>
+      </div>
+      <div class="live-chart-grid">
+        @for (coreId of coreIds(); track coreId) {
+          <app-live-metric-chart kind="core" [coreId]="coreId" [history]="snapshot().machineHistory" />
+        }
+      </div>
+    </section>
+  }
+
+  <section class="metric-section" aria-labelledby="network-storage-heading">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">NETWORK &amp; STORAGE</p>
+        <h2 id="network-storage-heading">Traffic and disk activity</h2>
+      </div>
+    </div>
+    <div class="live-chart-grid">
+      <app-live-metric-chart kind="wifi" [history]="snapshot().machineHistory" />
+      <app-live-metric-chart kind="diskIo" [history]="snapshot().machineHistory" />
+      <app-live-metric-chart kind="disk" [history]="snapshot().machineHistory" />
     </div>
   </section>
 }
