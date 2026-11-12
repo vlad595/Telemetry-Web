@@ -1,0 +1,94 @@
+<section class="workspace-page">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">ACCOUNT</p>
+      <h1>Workspace management</h1>
+      <p class="muted">Manage workspaces, members, and invitations.</p>
+    </div>
+  </header>
+
+  @if (error()) { <p class="feedback error" role="alert">{{ error() }}</p> }
+  @if (message()) { <p class="feedback success" role="status">{{ message() }}</p> }
+
+  <div class="management-grid">
+    <section class="panel">
+      <h2>Create workspace</h2>
+      <form [formGroup]="createForm" (ngSubmit)="createWorkspace()">
+        <label for="workspace-name">Workspace name</label>
+        <input id="workspace-name" formControlName="workspaceName" maxlength="80" />
+        @if (createForm.controls.workspaceName.touched && createForm.controls.workspaceName.invalid) {
+          <small class="error">Enter a workspace name (up to 80 characters).</small>
+        }
+        <button type="submit" [disabled]="busy()">{{ busy() ? 'Working...' : 'Create workspace' }}</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Accept an invitation</h2>
+      <form [formGroup]="acceptForm" (ngSubmit)="acceptInvite()">
+        <label for="invite-code">Invitation code</label>
+        <input id="invite-code" formControlName="code" autocomplete="off" />
+        @if (acceptForm.controls.code.touched && acceptForm.controls.code.invalid) {
+          <small class="error">Enter the invitation code.</small>
+        }
+        <button type="submit" [disabled]="busy()">Join workspace</button>
+      </form>
+    </section>
+
+    <section class="panel members-panel">
+      <h2>Workspace members</h2>
+      @if (loading()) {
+        <p class="muted">Loading workspaces…</p>
+      } @else if (!selectedWorkspace()) {
+        <p class="muted">Select a workspace in the header to view its members.</p>
+      } @else if (members().length === 0) {
+        <p class="muted">No members found.</p>
+      } @else {
+        <p class="workspace-name">{{ selectedWorkspace()!.workspaceName }}</p>
+        <ul class="member-list">
+          @for (member of members(); track member.userId) {
+            <li>
+              <span class="member-name">{{ member.userName || 'Unnamed member' }}</span>
+              @if (member.userId !== selectedWorkspace()!.ownerId) {
+                <select
+                  class="role-select"
+                  [value]="member.userRole"
+                  [disabled]="busy()"
+                  [attr.aria-label]="'Role for ' + (member.userName || 'member')"
+                  (change)="changeMemberRole(member.userId, member.userRole, $event)"
+                >
+                  @for (role of roles; track role.value) {
+                    <option [value]="role.value">{{ role.label }}</option>
+                  }
+                </select>
+                <button type="button" class="text-button" [disabled]="busy()" (click)="removeMember(member.userId, member.userName || 'this member')">Remove</button>
+              } @else {
+                <span class="member-role">{{ roleName(member.userRole) }}</span>
+              }
+            </li>
+          }
+        </ul>
+        <button type="button" class="danger-button" [disabled]="busy()" (click)="removeWorkspace()">Delete workspace</button>
+      }
+    </section>
+
+    <section class="panel">
+      <h2>Create invitation</h2>
+      @if (!selectedWorkspace()) {
+        <p class="muted">Select a workspace in the header first.</p>
+      } @else {
+        <form [formGroup]="inviteForm" (ngSubmit)="createInvite()">
+          <label for="invite-role">Role for invited member</label>
+          <select id="invite-role" formControlName="role">
+            @for (role of roles; track role.value) { <option [ngValue]="role.value">{{ role.label }}</option> }
+          </select>
+          <button type="submit" [disabled]="busy()">{{ busy() ? 'Creating...' : 'Create invitation code' }}</button>
+        </form>
+        @if (latestInviteCode()) {
+          <div class="invite-code"><span>Invitation code</span><code>{{ latestInviteCode() }}</code></div>
+        }
+        <p class="muted note">The code expires after three days. Share it with the person joining.</p>
+      }
+    </section>
+  </div>
+</section>

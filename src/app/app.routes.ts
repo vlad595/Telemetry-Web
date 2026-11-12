@@ -23,7 +23,15 @@ export const routes: Routes = [
       },
       {
         path: 'analytics',
-        loadComponent: () => import('./features/analytics/analytics-page.component').then((module) => module.AnalyticsPageComponent),
+        loadComponent: () => import('./features/analytics/analytics-dashboard.component').then((module) => module.AnalyticsDashboardComponent),
+      },
+      {
+        path: 'workspace-management',
+        loadComponent: () => import('./features/workspace-management/workspace-management-page.component').then((module) => module.WorkspaceManagementPageComponent),
+      },
+      {
+        path: 'telegram',
+        loadComponent: () => import('./features/telegram/telegram-page.component').then((module) => module.TelegramPageComponent),
       },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],

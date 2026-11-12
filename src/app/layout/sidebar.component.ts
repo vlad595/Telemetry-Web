@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
+import { WorkspaceService } from '../core/services/workspace.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -9,13 +10,13 @@ import { AuthService } from '../core/services/auth.service';
   template: `
     <aside class="sidebar">
       <a class="brand" routerLink="/dashboard">Telemetry</a>
-      <p class="section-label">MONITORING</p>
+      <p class="section-label">MENU</p>
       <nav aria-label="Main navigation">
         <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
         <a routerLink="/setup" routerLinkActive="active">Add instance</a>
-        <a routerLink="/analytics" routerLinkActive="active" class="analytics-link">
-          <span>Analytics</span><span class="coming-soon">Soon</span>
-        </a>
+        <a routerLink="/workspace-management" routerLinkActive="active">Workspace management</a>
+        <a routerLink="/analytics" routerLinkActive="active">Analytics Dashboard</a>
+        <a routerLink="/telegram" routerLinkActive="active">Telegram</a>
       </nav>
       <button type="button" class="sign-out" (click)="signOut()">Sign out</button>
     </aside>
@@ -27,16 +28,17 @@ import { AuthService } from '../core/services/auth.service';
     'nav { display: grid; gap: 4px; }',
     'nav a { display: flex; justify-content: space-between; padding: 10px; color: var(--ink); text-decoration: none; }',
     'nav a.active { background: var(--accent-soft); color: var(--accent); font-weight: 700; }',
-    '.coming-soon { color: var(--muted); font-size: 11px; }',
     '.sign-out { margin-top: auto; padding: 10px; border: 1px solid var(--border); background: transparent; color: var(--ink); text-align: left; cursor: pointer; }',
-    '@media (max-width: 760px) { .sidebar { min-height: 0; padding: 12px 16px; border-right: 0; border-bottom: 1px solid var(--border); } .brand { padding: 4px 0 12px; } .section-label, .sign-out { display: none; } nav { grid-template-columns: repeat(3, 1fr); } nav a { justify-content: center; padding: 9px 4px; font-size: 13px; } .analytics-link .coming-soon { display: none; } }',
+    '@media (max-width: 760px) { .sidebar { min-height: 0; padding: 12px 16px; border-right: 0; border-bottom: 1px solid var(--border); } .brand { padding: 4px 0 12px; } .section-label, .sign-out { display: none; } nav { display: flex; overflow-x: auto; white-space: nowrap; } nav a { flex: 0 0 auto; justify-content: center; padding: 9px 8px; font-size: 13px; } }',
   ],
 })
 export class SidebarComponent {
   private readonly auth = inject(AuthService);
+  private readonly workspaces = inject(WorkspaceService);
   private readonly router = inject(Router);
 
   signOut(): void {
+    this.workspaces.selectWorkspace(null);
     this.auth.logout();
     void this.router.navigateByUrl('/auth');
   }

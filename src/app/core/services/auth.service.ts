@@ -1,7 +1,7 @@
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthResponse, LoginRequest, RegisterRequest, UserContext } from '../models/auth.models';
 
@@ -27,6 +27,20 @@ export class AuthService {
 
   currentUser(): Observable<UserContext> {
     return this.http.get<UserContext>(`${this.baseUrl}/api/user/me`);
+  }
+
+  generateTelegramLink(): Observable<string> {
+    return this.http.post(`${this.baseUrl}/api/user/telegram`, null, { responseType: 'text' }).pipe(
+      map((response) => {
+        const link = response.trim().startsWith('"') ? JSON.parse(response) as string : response.trim();
+        if (!link.startsWith('https://t.me/')) throw new Error('Auth API returned an invalid Telegram link.');
+        return link;
+      }),
+    );
+  }
+
+  disconnectTelegram(): Observable<UserContext> {
+    return this.http.delete<UserContext>(`${this.baseUrl}/api/user/telegram/delete-connection`);
   }
 
   token(): string | null {

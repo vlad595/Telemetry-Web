@@ -1,0 +1,170 @@
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">ANALYTICS</p>
+    <h1>Analytics Dashboard</h1>
+    <p>Historical metrics for a selected agent.</p>
+  </div>
+  @if (instances().length > 0) {
+    <div class="filters">
+      <label class="agent-picker">
+        <span>Agent</span>
+        <select [value]="selectedAgentId()" (change)="selectAgent($event)">
+          @for (instance of instances(); track instance.id) {
+            <option [value]="instance.id">{{ instance.name }}</option>
+          }
+        </select>
+      </label>
+    </div>
+  }
+</section>
+
+@if (selectedAgentId()) {
+  <section class="panel timeline-control">
+    <div class="section-heading">
+      <div><h2>Timeline (UTC)</h2><p>Selected: {{ selectedTimestamp() | date: 'full':'UTC' }}</p></div>
+      @if (timeRangeLoading()) { <span class="muted">Loading available data...</span> }
+    </div>
+    <label class="time-picker">
+      <span class="visually-hidden">Select a metric timestamp</span>
+      <input type="range" min="0" max="1000" step="1" [value]="timePosition()"
+        [disabled]="timeRangeLoading() || timelineEnd() <= timelineStart()"
+        [attr.aria-valuetext]="selectedTimestamp() | date: 'full':'UTC'" (input)="setTimePosition($event)" />
+      <span class="range-limits">
+        <span>{{ oldestTimestamp() | date: 'medium':'UTC' }}</span>
+        <span>{{ timelineEnd() | date: 'medium':'UTC' }}</span>
+      </span>
+    </label>
+    @if (snapshotError()) { <p class="error" role="alert">{{ snapshotError() }}</p> }
+  </section>
+}
+
+@if (loading() && !data()) {
+  <p class="panel">Loading analytics...</p>
+} @else if (error()) {
+  <p class="panel error" role="alert">{{ error() }}</p>
+} @else if (instances().length === 0) {
+  <section class="panel empty-state">
+    <h2>No agents available</h2>
+    <p>Add an agent to view its historical analytics.</p>
+    <a routerLink="/setup">Add an agent</a>
+  </section>
+} @else if (loading()) {
+  <p class="panel">Loading analytics for {{ selectedAgent()?.name }}...</p>
+}
+
+@if (selectedAgentId()) {
+  <section class="panel snapshot-panel" aria-live="polite">
+    <div class="section-heading">
+      <div>
+        <h2>Metrics at selected time</h2>
+        <p>Selected (UTC) {{ selectedTimestamp() | date: 'medium':'UTC' }}</p>
+        @if (snapshot(); as point) { <p>Metric timestamp (UTC) {{ point.timestamp | date: 'medium':'UTC' }}</p> }
+      </div>
+      @if (snapshotLoading()) { <span class="muted">Updating...</span> }
+    </div>
+    @if (snapshot(); as point) {
+      <div class="kpi-grid snapshot-grid">
+        <article class="panel kpi-card"><span>CPU</span><strong>{{ point.cpuUsage | number: '1.0-2' }}%</strong></article>
+        <article class="panel kpi-card"><span>Memory</span><strong>{{ point.memoryUsage | number: '1.0-2' }}%</strong></article>
+        <article class="panel kpi-card"><span>Disk space</span><strong>{{ point.diskSpace | number: '1.0-2' }}</strong></article>
+        <article class="panel kpi-card"><span>Network received</span><strong>{{ point.networkRxBytes | number: '1.0-0' }} B/s</strong></article>
+        <article class="panel kpi-card"><span>Network sent</span><strong>{{ point.networkTxBytes | number: '1.0-0' }} B/s</strong></article>
+      </div>
+    } @else if (!snapshotLoading() && !snapshotError()) {
+      <p class="muted">No measurements near this time.</p>
+    }
+  </section>
+}
+
+@if (data(); as dashboard) {
+
+  <section class="kpi-grid" aria-label="Agent summary">
+    <article class="panel kpi-card">
+      <span>Health score</span>
+      <strong>{{ healthPercent() }}</strong>
+      <small>{{ dashboard.healthScore.overloadedMeasurements }} overloaded of {{ dashboard.healthScore.totalMeasurements }} measurements</small>
+    </article>
+    <article class="panel kpi-card">
+      <span>Disk consumed</span>
+      <strong>{{ dashboard.diskConsumption.consumedDifference | number: '1.0-2' }}</strong>
+      <small>Start {{ dashboard.diskConsumption.startDiskSpace | number: '1.0-2' }} · End {{ dashboard.diskConsumption.endDiskSpace | number: '1.0-2' }}</small>
+    </article>
+  </section>
+
+  <section class="panel chart-panel">
+    <div class="section-heading"><div><h2>Daily peaks</h2><p>P95 CPU and memory</p></div></div>
+    @if (dashboard.peaks.length > 0) {
+      <div class="chart-wrap"><canvas #peaksCanvas aria-label="Daily P95 CPU and memory line chart"></canvas></div>
+    } @else {
+      <p class="muted">No peak data for this period.</p>
+    }
+  </section>
+
+  <section class="panel chart-panel">
+    <div class="section-heading"><div><h2>Network trends</h2><p>Traffic by period, MB</p></div></div>
+    @if (dashboard.networkTrends.length > 0) {
+      <div class="chart-wrap"><canvas #networkCanvas aria-label="Network traffic bar chart"></canvas></div>
+    } @else {
+      <p class="muted">No network data for this period.</p>
+    }
+  </section>
+
+  @if (dashboard.anomalies.length > 0) {
+    <section class="panel anomalies-panel">
+      <h2>Anomalies</h2>
+      <table>
+        <thead><tr><th>Time</th><th>CPU usage</th><th>Memory usage</th></tr></thead>
+        <tbody>
+          @for (anomaly of dashboard.anomalies; track anomaly.exactTime) {
+            <tr>
+              <td>{{ anomaly.exactTime | date: 'medium' }}</td>
+              <td>{{ anomaly.cpuUsage | number: '1.0-1' }}%</td>
+              <td>{{ anomaly.memoryUsage | number: '1.0-1' }}%</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+}
+
+@if (selectedAgentId()) {
+  <section class="panel custom-panel">
+    <div class="section-heading">
+      <div><h2>Custom analytics</h2><p>Choose the time range, grouping, metrics, and aggregation rules for this request.</p></div>
+    </div>
+    <div class="custom-controls">
+      <label>Hours ago
+        <input type="number" min="1" [max]="maxHistoryHours()" [value]="customHours()" (input)="customHours.set(+$any($event.target).value)" />
+      </label>
+      <label>Group by
+        <select [value]="customGrouping()" (change)="setCustomGrouping($event)">
+          @for (option of groupingOptions; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
+        </select>
+      </label>
+    </div>
+    <div class="rules-heading"><strong>Metric rules</strong><button class="secondary" type="button" (click)="addRule()">Add metric</button></div>
+    <div class="rules-list">
+      @for (rule of customRules(); track $index; let i = $index) {
+        <div class="rule-row">
+          <label>Metric name<input [value]="rule.metricName" placeholder="e.g. CpuUsage" (input)="updateRule(i, 'metricName', $event)" /></label>
+          <label>Aggregation
+            <select [value]="rule.aggregation" (change)="updateRule(i, 'aggregation', $event)">
+              @for (option of aggregationOptions; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
+            </select>
+          </label>
+          <label>Result alias<input [value]="rule.alias" placeholder="e.g. AverageCPU" (input)="updateRule(i, 'alias', $event)" /></label>
+          <button class="secondary remove-rule" type="button" aria-label="Remove metric" (click)="removeRule(i)">Remove</button>
+        </div>
+      }
+    </div>
+    <button type="button" [disabled]="customLoading()" (click)="runCustomExample()">
+      {{ customLoading() ? 'Running...' : 'Run custom query' }}
+    </button>
+    @if (customError()) { <p class="error" role="alert">{{ customError() }}</p> }
+    @if (customPoints().length > 0) {
+      <p class="muted">Mapped {{ customPoints().length }} data points from the dynamic response.</p>
+    }
+    <div class="chart-wrap" [hidden]="customPoints().length === 0"><canvas #customCanvas aria-label="Custom average RAM and P95 CPU line chart"></canvas></div>
+  </section>
+}

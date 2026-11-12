@@ -1,0 +1,50 @@
+<section class="telegram-page">
+  <header class="page-heading">
+    <p class="eyebrow">NOTIFICATIONS</p>
+    <h1>Telegram</h1>
+    <p class="muted">Connect the bot to receive alerts about your instances.</p>
+  </header>
+
+  <div class="connection-card">
+    <div class="status-row">
+      <div>
+        <h2>Bot connection</h2>
+        <p class="muted">Your Telegram account is linked to your Telemetry profile.</p>
+      </div>
+      @if (loading()) {
+        <span class="status">Checking...</span>
+      } @else {
+        <span class="status" [class.connected]="connected()">{{ connected() ? 'Connected' : 'Not connected' }}</span>
+      }
+    </div>
+
+    @if (error()) {
+      <p class="feedback error" role="alert">{{ error() }}</p>
+    }
+    @if (message()) {
+      <p class="feedback" role="status">{{ message() }}</p>
+    }
+
+    @if (!loading()) {
+      @if (connected()) {
+        <p>Alerts for your instances and workspaces can now be sent to your Telegram chat.</p>
+        <button type="button" class="secondary-button" [disabled]="busy()" (click)="disconnect()">Disconnect Telegram</button>
+      } @else {
+        <ol class="steps">
+          <li>Create a connection link.</li>
+          <li>Open the bot in Telegram and tap <strong>Start</strong>.</li>
+          <li>Return here and check the connection.</li>
+        </ol>
+        <div class="actions">
+          <button type="button" class="primary-button" [disabled]="busy()" (click)="generateLink()">
+            {{ link() ? 'Generate link again' : 'Create connection link' }}
+          </button>
+          @if (link()) {
+            <a class="primary-button link-button" [href]="link()" target="_blank" rel="noopener noreferrer">Open Telegram bot</a>
+          }
+          <button type="button" class="secondary-button" [disabled]="busy()" (click)="refreshStatus()">Check connection</button>
+        </div>
+      }
+    }
+  </div>
+</section>

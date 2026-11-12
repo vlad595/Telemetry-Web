@@ -4,6 +4,11 @@
     "changeOrigin": true,
     "pathRewrite": { "^/auth-api": "" }
   },
+  "/analytics-api": {
+    "target": "http://localhost:5021",
+    "changeOrigin": true,
+    "pathRewrite": { "^/analytics-api": "" }
+  },
   "/telemetry-hub": {
     "target": "http://localhost:5154",
     "changeOrigin": true,

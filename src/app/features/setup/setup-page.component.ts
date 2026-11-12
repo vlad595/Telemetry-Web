@@ -5,6 +5,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { InstanceService } from '../../core/services/instance.service';
 import { MetricsStreamService } from '../../core/services/metrics-stream.service';
+import { WorkspaceService } from '../../core/services/workspace.service';
 import { environment } from '../../../environments/environment';
 
 type AgentPlatform = 'linux' | 'windows';
@@ -23,6 +24,7 @@ const RELEASE_PAGE = `https://raw.githubusercontent.com/vlad595/TelemetryCollect
 export class SetupPageComponent implements OnInit, OnDestroy {
   private readonly instances = inject(InstanceService);
   private readonly stream = inject(MetricsStreamService);
+  private readonly workspaces = inject(WorkspaceService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -112,7 +114,10 @@ export class SetupPageComponent implements OnInit, OnDestroy {
     this.phase.set('saving');
     const { name } = this.form.getRawValue();
     this.instances
-      .create({ id: this.agentId(), name: name.trim() })
+      .create(
+        { id: this.agentId(), name: name.trim() },
+        this.workspaces.selectedWorkspaceId(),
+      )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (instance) => {

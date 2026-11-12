@@ -1,0 +1,60 @@
+:host { display: block; }
+.page-heading, .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; }
+.page-heading { margin-bottom: 22px; }
+.filters { display: flex; align-items: flex-end; gap: 10px; }
+.filters .agent-picker { min-width: 240px; }
+.timeline-control { margin: 0 0 16px; padding: 20px 26px; }
+.timeline-control .section-heading { margin-bottom: 10px; }
+.time-picker { display: grid; gap: 8px; width: 100%; }
+.timeline-control input[type="range"] { width: 100%; min-height: 34px; }
+.timeline-control input[type="range"]::-webkit-slider-runnable-track { height: 10px; }
+.timeline-control input[type="range"]::-webkit-slider-thumb { width: 24px; height: 24px; margin-top: -7px; }
+.timeline-control input[type="range"]::-moz-range-track { height: 10px; }
+.timeline-control input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.eyebrow { margin: 0 0 6px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .1em; }
+h1 { margin: 0; font-size: 28px; }
+h2 { margin: 0; font-size: 18px; }
+.page-heading p:last-child, .section-heading p { margin: 6px 0 0; color: var(--muted); }
+.agent-picker { display: grid; gap: 6px; min-width: 220px; font-size: 12px; font-weight: 600; }
+select, input { min-height: 40px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 0; background: var(--surface); color: var(--ink); font: inherit; }
+input[type="range"] { min-height: 20px; padding: 0; accent-color: var(--accent); }
+.range-limits { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; font-weight: 400; }
+.panel { padding: 18px; border: 1px solid var(--border); background: var(--surface); }
+.error { color: var(--danger); }
+.empty-state h2 { margin-bottom: 8px; }
+.empty-state p, .muted { color: var(--muted); }
+.empty-state a { color: var(--accent); }
+.kpi-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+.snapshot-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); margin-bottom: 0; }
+.kpi-card { display: flex; flex-direction: column; gap: 9px; }
+.kpi-card > span, .kpi-card small { color: var(--muted); }
+.kpi-card strong { font-size: 27px; }
+.chart-panel, .anomalies-panel, .custom-panel { margin-top: 16px; }
+.section-heading { align-items: center; margin-bottom: 16px; }
+.custom-controls { display: flex; gap: 12px; margin-bottom: 16px; }
+.custom-controls label, .rule-row label { display: grid; gap: 5px; color: var(--muted); font-size: 12px; font-weight: 600; }
+.custom-controls input, .custom-controls select { min-width: 160px; }
+.rules-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.rules-list { display: grid; gap: 8px; margin-bottom: 14px; }
+.rule-row { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr auto; align-items: end; gap: 8px; }
+.rule-row input, .rule-row select { width: 100%; min-width: 0; }
+.secondary { border-color: var(--border); background: var(--surface); color: var(--ink); }
+.chart-wrap { position: relative; min-height: 300px; }
+.chart-wrap[hidden] { display: none; }
+button { min-height: 38px; padding: 8px 12px; border: 1px solid var(--accent); border-radius: 0; background: var(--accent); color: #fff; font: inherit; cursor: pointer; }
+button:disabled { opacity: .6; cursor: wait; }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: 10px 8px; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-size: 12px; font-weight: 600; }
+@media (max-width: 650px) {
+  .page-heading { align-items: stretch; flex-direction: column; }
+  .filters, .custom-controls { align-items: stretch; flex-direction: column; }
+  .agent-picker { min-width: 0; }
+  .rule-row { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .snapshot-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .section-heading { align-items: flex-start; flex-direction: column; }
+  .timeline-control { padding: 16px; }
+  .chart-wrap { min-height: 240px; }
+}

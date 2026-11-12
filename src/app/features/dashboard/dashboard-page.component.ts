@@ -1,11 +1,13 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { catchError, distinctUntilChanged, from, of, startWith, switchMap, tap } from 'rxjs';
 import { Instance } from '../../core/models/auth.models';
 import { EMPTY_METRICS, MetricsGroupingService } from '../../core/services/metrics-grouping.service';
 import { InstanceService } from '../../core/services/instance.service';
 import { MetricsStreamService } from '../../core/services/metrics-stream.service';
+import { WorkspaceService } from '../../core/services/workspace.service';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -20,6 +22,8 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly grouping = inject(MetricsGroupingService);
   private readonly stream = inject(MetricsStreamService);
+  private readonly workspaces = inject(WorkspaceService);
+  private readonly workspaceId$ = toObservable(this.workspaces.selectedWorkspaceId);
 
   readonly instances = signal<Instance[]>([]);
   readonly selectedId = signal('');
@@ -29,22 +33,44 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
   readonly snapshot = toSignal(this.grouping.group(this.stream.events$), { initialValue: EMPTY_METRICS });
 
   ngOnInit(): void {
-    this.instancesApi
-      .listMine()
-      .pipe(takeUntilDestroyed(this.destroyRef))
+    this.workspaceId$
+      .pipe(
+        startWith(this.workspaces.selectedWorkspaceId()),
+        distinctUntilChanged(),
+        tap(() => {
+          this.loading.set(true);
+          this.error.set('');
+          this.instances.set([]);
+          this.selectedId.set('');
+        }),
+        switchMap((workspaceId) =>
+          from(this.stream.disconnect()).pipe(
+            switchMap(() =>
+              (workspaceId ? this.instancesApi.listWorkspace(workspaceId) : this.instancesApi.listMine()).pipe(
+                catchError((error: unknown) => {
+                  this.error.set(error instanceof Error ? error.message : 'Could not load instances.');
+                  return of(null);
+                }),
+              ),
+            ),
+          ),
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
         next: (instances) => {
+          this.loading.set(false);
+          if (!instances) return;
+
           this.instances.set(instances);
-          this.loading.set(false);
-          if (instances.length > 0) {
-            const preferredId = this.route.snapshot.queryParamMap.get('instanceId');
-            const preferred = instances.find((instance) => instance.id.toLowerCase() === preferredId?.toLowerCase());
-            this.selectInstanceId((preferred ?? instances[0]).id);
+          if (instances.length === 0) {
+            this.selectInstanceId('');
+            return;
           }
-        },
-        error: (error: unknown) => {
-          this.loading.set(false);
-          this.error.set(error instanceof Error ? error.message : 'Could not load instances.');
+
+          const preferredId = this.route.snapshot.queryParamMap.get('instanceId');
+          const preferred = instances.find((instance) => instance.id.toLowerCase() === preferredId?.toLowerCase());
+          this.selectInstanceId((preferred ?? instances[0]).id);
         },
       });
   }

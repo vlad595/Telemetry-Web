@@ -11,3 +11,4 @@ export const anonymousGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   return !auth.isAuthenticated() || inject(Router).createUrlTree(['/dashboard']);
 };
+

@@ -1,1 +1,12 @@
-<p>header works!</p>
+<header class="app-header">
+  <a class="brand" routerLink="/dashboard">Telemetry</a>
+  <label class="workspace-picker" for="workspace-select">
+    <span>Workspace</span>
+    <select id="workspace-select" [formControl]="workspaceControl" [disabled]="loading()">
+      <option value="">My instances</option>
+      @for (workspace of workspaceService.workspaces(); track workspace.id) {
+        <option [value]="workspace.id">{{ workspace.workspaceName }}</option>
+      }
+    </select>
+  </label>
+</header>
