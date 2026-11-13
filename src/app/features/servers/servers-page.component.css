@@ -1,0 +1,41 @@
+:host { display: block; }
+.servers-page { max-width: 1200px; margin: 0 auto; }
+.page-heading, .group-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; }
+.page-heading { margin-bottom: 22px; }
+.eyebrow { margin: 0 0 7px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .1em; }
+h1, h2, p { margin-top: 0; }
+h1 { margin-bottom: 7px; font-size: 28px; }
+h2 { margin-bottom: 0; font-size: 19px; }
+.muted, .summary, .group-count { color: var(--muted); }
+.page-heading .muted { margin-bottom: 0; }
+.refresh-button { min-height: 38px; padding: 8px 14px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
+.refresh-button:disabled, .transfer-toggle:disabled, .submit-transfer:disabled { cursor: wait; opacity: .6; }
+.feedback { margin: 0 0 16px; padding: 10px 12px; border: 1px solid var(--border); background: var(--surface); }
+.error { color: var(--danger); }
+.success { color: var(--accent); }
+.summary { margin-bottom: 24px; font-size: 12px; }
+.server-group { margin-bottom: 30px; }
+.group-heading { margin-bottom: 12px; }
+.group-count { font-size: 12px; }
+.server-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.server-card { min-width: 0; border: 1px solid var(--border); background: var(--surface); }
+.server-link { display: flex; align-items: start; gap: 12px; min-height: 124px; padding: 18px; color: var(--ink); text-decoration: none; }
+.server-link:hover { background: var(--accent-soft); }
+.server-link:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.server-icon { display: grid; place-items: center; flex: 0 0 36px; width: 36px; height: 36px; background: var(--accent-soft); color: var(--accent); font-size: 19px; }
+.server-details { display: grid; min-width: 0; gap: 7px; }
+.server-details strong { overflow-wrap: anywhere; font-size: 16px; }
+.ownership { color: var(--accent); font-size: 12px; }
+.server-id { overflow-wrap: anywhere; color: var(--muted); font-size: 11px; }
+.open-arrow { margin-left: auto; color: var(--muted); font-size: 18px; }
+.card-actions { padding: 0 18px 16px; }
+.transfer-toggle { padding: 0; border: 0; background: transparent; color: var(--accent); cursor: pointer; font-weight: 600; }
+.transfer-form { display: grid; gap: 9px; padding: 16px 18px 18px; border-top: 1px solid var(--border); }
+.transfer-form label { font-size: 12px; font-weight: 600; }
+.transfer-form select, .transfer-form input { width: 100%; min-height: 38px; padding: 8px 10px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); }
+.submit-transfer { min-height: 38px; margin-top: 5px; padding: 8px 12px; border: 1px solid var(--accent); background: var(--accent); color: white; cursor: pointer; font-weight: 600; }
+.empty-state { padding: 24px; border: 1px solid var(--border); background: var(--surface); }
+.empty-state h2 { margin-bottom: 8px; }
+.empty-state p { color: var(--muted); }
+.add-link { display: inline-block; padding: 9px 14px; background: var(--accent); color: white; text-decoration: none; }
+@media (max-width: 620px) { .page-heading { align-items: start; flex-direction: column; } .server-grid { grid-template-columns: 1fr; } }

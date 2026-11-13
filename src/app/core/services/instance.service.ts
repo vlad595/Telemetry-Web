@@ -24,4 +24,26 @@ export class InstanceService {
     }
     return this.http.post<Instance>(`${this.baseUrl}/api/instance`, request);
   }
+
+  transferToOwner(instanceId: string, newOwnerId: string): Observable<Instance> {
+    return this.http.patch<Instance>(
+      `${this.baseUrl}/api/instance/${encodeURIComponent(instanceId)}/transfer/toNewOwner=${encodeURIComponent(newOwnerId)}`,
+      null,
+    );
+  }
+
+  transferToWorkspace(instanceId: string, workspaceId: string): Observable<Instance> {
+    // Keep the existing API route spelling for compatibility.
+    return this.http.patch<Instance>(
+      `${this.baseUrl}/api/instance/${encodeURIComponent(instanceId)}/transfer/toWorkspacer=${encodeURIComponent(workspaceId)}`,
+      null,
+    );
+  }
+
+  transferBetweenWorkspaces(instanceId: string, currentWorkspaceId: string, newWorkspaceId: string): Observable<Instance> {
+    return this.http.patch<Instance>(
+      `${this.baseUrl}/api/instance/${encodeURIComponent(instanceId)}/transfer_from=${encodeURIComponent(currentWorkspaceId)}/toNewWorkspaceId=${encodeURIComponent(newWorkspaceId)}`,
+      null,
+    );
+  }
 }

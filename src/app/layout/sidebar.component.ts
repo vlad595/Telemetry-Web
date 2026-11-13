@@ -13,6 +13,7 @@ import { WorkspaceService } from '../core/services/workspace.service';
       <p class="section-label">MENU</p>
       <nav aria-label="Main navigation">
         <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
+        <a routerLink="/servers" routerLinkActive="active">All servers</a>
         <a routerLink="/setup" routerLinkActive="active">Add instance</a>
         <a routerLink="/workspace-management" routerLinkActive="active">Workspace management</a>
         <a routerLink="/analytics" routerLinkActive="active">Analytics Dashboard</a>

@@ -1,0 +1,81 @@
+<section class="servers-page">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">INVENTORY</p>
+      <h1>All servers</h1>
+      <p class="muted">Servers you own and servers shared through your workspaces. Open a card to view its dashboard.</p>
+    </div>
+    <button type="button" class="refresh-button" [disabled]="loading() || busy()" (click)="loadServers()">Refresh</button>
+  </header>
+
+  @if (error()) { <p class="feedback error" role="alert">{{ error() }}</p> }
+  @if (message()) { <p class="feedback success" role="status">{{ message() }}</p> }
+
+  @if (loading()) {
+    <p class="empty-state">Loading servers…</p>
+  } @else if (servers().length === 0 && !error()) {
+    <div class="empty-state">
+      <h2>No servers yet</h2>
+      <p>Add a server to start monitoring it.</p>
+      <a routerLink="/setup" class="add-link">Add server</a>
+    </div>
+  } @else {
+    <p class="summary">{{ servers().length }} {{ servers().length === 1 ? 'server' : 'servers' }} in {{ groups().length }} {{ groups().length === 1 ? 'group' : 'groups' }}</p>
+    @for (group of groups(); track group.id) {
+      <section class="server-group" [attr.aria-label]="group.name">
+        <div class="group-heading">
+          <div>
+            <p class="eyebrow">{{ group.id === 'personal' ? 'PERSONAL' : 'WORKSPACE' }}</p>
+            <h2>{{ group.name }}</h2>
+          </div>
+          <span class="group-count">{{ group.servers.length }} {{ group.servers.length === 1 ? 'server' : 'servers' }}</span>
+        </div>
+        <div class="server-grid">
+          @for (server of group.servers; track server.id) {
+            <article class="server-card">
+              <a class="server-link" routerLink="/dashboard" [queryParams]="{ instanceId: server.id }" (click)="setDashboardWorkspace(server)">
+                <span class="server-icon" aria-hidden="true">▣</span>
+                <span class="server-details">
+                  <strong>{{ server.name || 'Unnamed server' }}</strong>
+                  <span class="ownership">{{ canTransfer(server) ? 'Owned by you' : 'Shared server' }}</span>
+                  <span class="server-id">{{ server.id }}</span>
+                </span>
+                <span class="open-arrow" aria-hidden="true">↗</span>
+              </a>
+              @if (canTransfer(server)) {
+                <div class="card-actions">
+                  <button type="button" class="transfer-toggle" [disabled]="busy()" [attr.aria-expanded]="transferInstanceId() === server.id" (click)="toggleTransfer(server)">
+                    {{ transferInstanceId() === server.id ? 'Cancel transfer' : 'Transfer server' }}
+                  </button>
+                </div>
+              }
+              @if (transferInstanceId() === server.id) {
+                <form class="transfer-form" (ngSubmit)="transfer()">
+                  <label [for]="'transfer-mode-' + server.id">Transfer to</label>
+                  <select [id]="'transfer-mode-' + server.id" [formControl]="mode" [disabled]="busy()">
+                    @if (destinations().length) { <option value="workspace">Workspace</option> }
+                    <option value="owner">New owner</option>
+                  </select>
+
+                  @if (mode.value === 'workspace') {
+                    <label [for]="'transfer-workspace-' + server.id">Destination workspace</label>
+                    <select [id]="'transfer-workspace-' + server.id" [formControl]="targetWorkspaceId" [disabled]="busy()">
+                      <option value="">Select workspace</option>
+                      @for (workspace of destinations(); track workspace.id) {
+                        <option [value]="workspace.id">{{ workspace.workspaceName }}</option>
+                      }
+                    </select>
+                  } @else {
+                    <label [for]="'transfer-owner-' + server.id">New owner's user ID</label>
+                    <input [id]="'transfer-owner-' + server.id" type="text" [formControl]="targetOwnerId" [disabled]="busy()" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off" />
+                  }
+                  <button type="submit" class="submit-transfer" [disabled]="busy()">{{ busy() ? 'Transferring…' : 'Confirm transfer' }}</button>
+                </form>
+              }
+            </article>
+          }
+        </div>
+      </section>
+    }
+  }
+</section>

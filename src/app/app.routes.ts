@@ -22,6 +22,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/setup/setup-page.component').then((module) => module.SetupPageComponent),
       },
       {
+        path: 'servers',
+        loadComponent: () => import('./features/servers/servers-page.component').then((module) => module.ServersPageComponent),
+      },
+      {
         path: 'analytics',
         loadComponent: () => import('./features/analytics/analytics-dashboard.component').then((module) => module.AnalyticsDashboardComponent),
       },
