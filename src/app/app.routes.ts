@@ -41,6 +41,10 @@ export const routes: Routes = [
         path: 'plan',
         loadComponent: () => import('./features/plan/plan-page.component').then((module) => module.PlanPageComponent),
       },
+      {
+        path: 'about',
+        loadComponent: () => import('./features/about/about-page.component').then((module) => module.AboutPageComponent),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

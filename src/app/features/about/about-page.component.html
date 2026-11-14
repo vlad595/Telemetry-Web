@@ -1,0 +1,44 @@
+<section class="about-page">
+  <header class="page-heading">
+    <p class="eyebrow">ACCOUNT</p>
+    <h1>About</h1>
+    <p class="muted">Your account information.</p>
+  </header>
+
+  @if (loading()) {
+    <p class="feedback" role="status">Loading your account…</p>
+  }
+  @if (error()) {
+    <p class="feedback error" role="alert">{{ error() }}</p>
+  }
+
+  @if (user(); as account) {
+    <section class="panel" aria-labelledby="account-heading">
+      <h2 id="account-heading">Profile</h2>
+      <dl class="account-details">
+        <div><dt>ID</dt><dd class="account-id">{{ account.id }}</dd></div>
+        <div><dt>Name</dt><dd>{{ account.userName }}</dd></div>
+        <div><dt>Email</dt><dd>{{ account.email }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="panel danger-zone" aria-labelledby="delete-heading">
+      <h2 id="delete-heading">Delete account</h2>
+      <p class="muted">Permanently remove your account when you no longer need it.</p>
+      @if (!confirming()) {
+        <button type="button" class="danger-button" (click)="showDeleteConfirmation()">Delete account</button>
+      } @else {
+        <div class="confirmation" role="group" aria-labelledby="confirm-heading">
+          <h3 id="confirm-heading">Are you sure?</h3>
+          <p>This deletes your account, your servers, and workspaces you own. Other members lose access to those workspaces; their servers remain with them.</p>
+          <div class="confirmation-actions">
+            <button type="button" class="secondary-button" [disabled]="deleting()" (click)="cancelDelete()">Cancel</button>
+            <button type="button" class="danger-button" [disabled]="deleting()" (click)="deleteAccount()">
+              {{ deleting() ? 'Deleting account…' : 'Yes, delete my account' }}
+            </button>
+          </div>
+        </div>
+      }
+    </section>
+  }
+</section>

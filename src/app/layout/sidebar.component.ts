@@ -19,6 +19,7 @@ import { WorkspaceService } from '../core/services/workspace.service';
         <a routerLink="/analytics" routerLinkActive="active">Analytics Dashboard</a>
         <a routerLink="/telegram" routerLinkActive="active">Telegram</a>
         <a routerLink="/plan" routerLinkActive="active">Plan</a>
+        <a routerLink="/about" routerLinkActive="active">About</a>
       </nav>
       <button type="button" class="sign-out" (click)="signOut()">Sign out</button>
     </aside>

@@ -29,6 +29,10 @@ export class AuthService {
     return this.http.get<UserContext>(`${this.baseUrl}/api/user/me`);
   }
 
+  deleteAccount(userId: string): Observable<UserContext> {
+    return this.http.delete<UserContext>(`${this.baseUrl}/api/user/remove=${encodeURIComponent(userId)}`);
+  }
+
   upgradePlan(tier: SubscriptionTier): Observable<UserContext> {
     return this.http.patch<UserContext>(`${this.baseUrl}/api/user/plan/upgrade=${tier}`, null);
   }

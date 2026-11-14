@@ -1,0 +1,26 @@
+:host { display: block; }
+.about-page { max-width: 880px; margin: 0 auto; }
+.page-heading { margin-bottom: 22px; }
+.eyebrow { margin: 0 0 6px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .1em; }
+h1 { margin: 0; font-size: 28px; }
+h2 { margin: 0 0 16px; font-size: 18px; }
+h3 { margin: 0 0 8px; font-size: 16px; }
+p { margin-top: 0; }
+.page-heading .muted { margin: 8px 0 0; }
+.muted { color: var(--muted); }
+.panel { margin-bottom: 16px; padding: 22px; border: 1px solid var(--border); background: var(--surface); }
+.account-details { margin: 0; }
+.account-details > div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 16px; padding: 13px 0; border-top: 1px solid var(--border); }
+dt { color: var(--muted); }
+dd { min-width: 0; margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.account-id { font-family: monospace; font-weight: 400; }
+.danger-zone { border-color: color-mix(in srgb, var(--danger) 35%, var(--border)); }
+.danger-zone .muted { margin-bottom: 18px; }
+.danger-button { min-height: 40px; padding: 9px 14px; border: 1px solid var(--danger); background: var(--danger); color: #fff; cursor: pointer; font-weight: 600; }
+.danger-button:disabled { cursor: wait; opacity: .6; }
+.confirmation { padding: 16px; border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--border)); background: color-mix(in srgb, var(--danger) 5%, var(--surface)); }
+.confirmation p { margin-bottom: 16px; line-height: 1.5; }
+.confirmation-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.feedback { margin: 0 0 16px; padding: 10px 12px; border: 1px solid var(--border); background: var(--surface); }
+.feedback.error { color: var(--danger); }
+@media (max-width: 600px) { .panel { padding: 16px; } .account-details > div { grid-template-columns: 1fr; gap: 5px; } }
