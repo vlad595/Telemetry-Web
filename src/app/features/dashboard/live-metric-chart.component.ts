@@ -2,6 +2,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, inject, Input, OnChanges, OnDestroy, PLATFORM_ID, ViewChild } from '@angular/core';
 import { Chart, ChartDataset, registerables } from 'chart.js';
 import { MachineMetrics } from '../../core/models/telemetry.models';
+import { LanguageService } from '../../core/services/language.service';
 
 Chart.register(...registerables);
 
@@ -27,7 +28,7 @@ interface MetricSeries {
       </div>
       <p class="subtitle">{{ subtitle }}</p>
       <div class="chart-frame">
-        <canvas #canvas role="img" [attr.aria-label]="title + ' live history'"></canvas>
+        <canvas #canvas role="img" [attr.aria-label]="title + ' ' + i18n.t('live history')"></canvas>
       </div>
     </article>
   `,
@@ -45,6 +46,7 @@ interface MetricSeries {
 })
 export class LiveMetricChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
+  readonly i18n = inject(LanguageService);
   private chart?: Chart<'line', (number | null)[], string>;
 
   @Input({ required: true }) kind!: LiveChartKind;
@@ -54,35 +56,35 @@ export class LiveMetricChartComponent implements AfterViewInit, OnChanges, OnDes
 
   get title(): string {
     switch (this.kind) {
-      case 'cpu': return 'Total CPU';
-      case 'core': return `Core ${this.coreId}`;
-      case 'ram': return 'Memory';
-      case 'sockets': return 'Open sockets';
-      case 'wifi': return 'Wi-Fi traffic';
-      case 'disk': return 'Free disk space';
-      case 'diskIo': return 'Disk I/O';
+      case 'cpu': return this.i18n.t('Total CPU');
+      case 'core': return `${this.i18n.t('Core')} ${this.coreId}`;
+      case 'ram': return this.i18n.t('Memory');
+      case 'sockets': return this.i18n.t('Open sockets');
+      case 'wifi': return this.i18n.t('Wi-Fi traffic');
+      case 'disk': return this.i18n.t('Free disk space');
+      case 'diskIo': return this.i18n.t('Disk I/O');
     }
   }
 
   get eyebrow(): string {
     switch (this.kind) {
-      case 'cpu': case 'core': return 'PROCESSOR';
-      case 'ram': return 'MEMORY';
-      case 'sockets': case 'wifi': return 'NETWORK';
-      case 'disk': case 'diskIo': return 'STORAGE';
+      case 'cpu': case 'core': return this.i18n.t('PROCESSOR');
+      case 'ram': return this.i18n.t('MEMORY');
+      case 'sockets': case 'wifi': return this.i18n.t('NETWORK');
+      case 'disk': case 'diskIo': return this.i18n.t('STORAGE');
     }
   }
 
   get subtitle(): string {
     const latest = this.history.at(-1);
     switch (this.kind) {
-      case 'cpu': return latest?.cpuName ?? 'Overall processor utilization';
-      case 'core': return 'Individual core utilization';
-      case 'ram': return `${(latest?.totalRam ?? 0).toLocaleString()} MB total`;
-      case 'sockets': return 'Current open connections';
-      case 'wifi': return 'Received and sent per second';
-      case 'disk': return 'Available storage in MB';
-      case 'diskIo': return 'Read and write per second';
+      case 'cpu': return latest?.cpuName ?? this.i18n.t('Overall processor utilization');
+      case 'core': return this.i18n.t('Individual core utilization');
+      case 'ram': return `${(latest?.totalRam ?? 0).toLocaleString(this.locale)} MB ${this.i18n.t('total')}`;
+      case 'sockets': return this.i18n.t('Current open connections');
+      case 'wifi': return this.i18n.t('Received and sent per second');
+      case 'disk': return this.i18n.t('Available storage in MB');
+      case 'diskIo': return this.i18n.t('Read and write per second');
     }
   }
 
@@ -97,9 +99,9 @@ export class LiveMetricChartComponent implements AfterViewInit, OnChanges, OnDes
         return load === undefined ? '—' : `${Math.round(load * 100)}%`;
       }
       case 'ram': return `${Math.round(latest.ramLoad * 100)}%`;
-      case 'sockets': return latest.openSockets.toLocaleString();
+      case 'sockets': return latest.openSockets.toLocaleString(this.locale);
       case 'wifi': return `↓ ${formatRate(latest.wifiRx)} · ↑ ${formatRate(latest.wifiTx)}`;
-      case 'disk': return `${Math.round(latest.freeDiskSpace).toLocaleString()} MB`;
+      case 'disk': return `${Math.round(latest.freeDiskSpace).toLocaleString(this.locale)} MB`;
       case 'diskIo': return `R ${formatRate(latest.readingSpeed)} · W ${formatRate(latest.writingSpeed)}`;
     }
   }
@@ -156,6 +158,10 @@ export class LiveMetricChartComponent implements AfterViewInit, OnChanges, OnDes
     return this.kind === 'cpu' || this.kind === 'core' || this.kind === 'ram';
   }
 
+  private get locale(): string {
+    return this.i18n.language() === 'uk' ? 'uk-UA' : 'en-US';
+  }
+
   private updateChart(): void {
     if (!this.chart) return;
 
@@ -163,7 +169,7 @@ export class LiveMetricChartComponent implements AfterViewInit, OnChanges, OnDes
       const timestamp = new Date(metric.timestamp);
       return Number.isNaN(timestamp.getTime())
         ? `#${index + 1}`
-        : timestamp.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        : timestamp.toLocaleTimeString(this.locale, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     });
     this.chart.data.datasets = this.series().map((series): ChartDataset<'line', (number | null)[]> => ({
       label: series.label,
@@ -183,7 +189,7 @@ export class LiveMetricChartComponent implements AfterViewInit, OnChanges, OnDes
     switch (this.kind) {
       case 'cpu': return [{ label: 'CPU', color: '#2c7865', value: (metric) => metric.cpuLoad * 100 }];
       case 'core': return [{
-        label: `Core ${this.coreId}`,
+        label: `${this.i18n.t('Core')} ${this.coreId}`,
         color: '#2d7fa0',
         value: (metric) => {
           const load = metric.cpuCoreLoads.find((core) => core.coreId === this.coreId)?.load;
@@ -191,15 +197,15 @@ export class LiveMetricChartComponent implements AfterViewInit, OnChanges, OnDes
         },
       }];
       case 'ram': return [{ label: 'RAM', color: '#7f67ad', value: (metric) => metric.ramLoad * 100 }];
-      case 'sockets': return [{ label: 'Sockets', color: '#ca7450', value: (metric) => metric.openSockets }];
+      case 'sockets': return [{ label: this.i18n.t('Sockets'), color: '#ca7450', value: (metric) => metric.openSockets }];
       case 'wifi': return [
-        { label: 'Received', color: '#2c7865', value: (metric) => metric.wifiRx },
-        { label: 'Sent', color: '#2d7fa0', value: (metric) => metric.wifiTx },
+        { label: this.i18n.t('Received'), color: '#2c7865', value: (metric) => metric.wifiRx },
+        { label: this.i18n.t('Sent'), color: '#2d7fa0', value: (metric) => metric.wifiTx },
       ];
-      case 'disk': return [{ label: 'Free space', color: '#7f67ad', value: (metric) => metric.freeDiskSpace }];
+      case 'disk': return [{ label: this.i18n.t('Free space'), color: '#7f67ad', value: (metric) => metric.freeDiskSpace }];
       case 'diskIo': return [
-        { label: 'Read', color: '#2c7865', value: (metric) => metric.readingSpeed },
-        { label: 'Write', color: '#ca7450', value: (metric) => metric.writingSpeed },
+        { label: this.i18n.t('Read'), color: '#2c7865', value: (metric) => metric.readingSpeed },
+        { label: this.i18n.t('Write'), color: '#ca7450', value: (metric) => metric.writingSpeed },
       ];
     }
   }
@@ -208,8 +214,8 @@ export class LiveMetricChartComponent implements AfterViewInit, OnChanges, OnDes
     if (value === null) return '—';
     if (this.kind === 'wifi' || this.kind === 'diskIo') return formatRate(value);
     if (this.isPercent) return `${Math.round(value)}%`;
-    if (this.kind === 'disk') return `${Math.round(value).toLocaleString()} MB`;
-    return Math.round(value).toLocaleString();
+    if (this.kind === 'disk') return `${Math.round(value).toLocaleString(this.locale)} MB`;
+    return Math.round(value).toLocaleString(this.locale);
   }
 }
 

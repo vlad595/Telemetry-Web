@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { Component, computed, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -8,16 +8,18 @@ import { EMPTY_METRICS, MetricsGroupingService } from '../../core/services/metri
 import { InstanceService } from '../../core/services/instance.service';
 import { MetricsStreamService } from '../../core/services/metrics-stream.service';
 import { WorkspaceService } from '../../core/services/workspace.service';
+import { LanguageService } from '../../core/services/language.service';
 import { LiveMetricChartComponent } from './live-metric-chart.component';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, RouterLink, LiveMetricChartComponent],
+  imports: [DecimalPipe, RouterLink, LiveMetricChartComponent],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.css',
 })
 export class DashboardPageComponent implements OnInit, OnDestroy {
+  readonly i18n = inject(LanguageService);
   private readonly instancesApi = inject(InstanceService);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);

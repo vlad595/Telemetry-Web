@@ -5,25 +5,32 @@ import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { UserContext } from '../../core/models/auth.models';
 import { AuthService } from '../../core/services/auth.service';
+import { LanguageService, SiteLanguage } from '../../core/services/language.service';
 import { WorkspaceService } from '../../core/services/workspace.service';
 
 @Component({
-  selector: 'app-about-page',
+  selector: 'app-settings-page',
   standalone: true,
-  templateUrl: './about-page.component.html',
-  styleUrl: './about-page.component.css',
+  templateUrl: './settings-page.component.html',
+  styleUrl: './settings-page.component.css',
 })
-export class AboutPageComponent implements OnInit {
+export class SettingsPageComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly workspaces = inject(WorkspaceService);
+  readonly i18n = inject(LanguageService);
 
   readonly user = signal<UserContext | null>(null);
   readonly loading = signal(true);
   readonly deleting = signal(false);
   readonly confirming = signal(false);
   readonly error = signal('');
+
+  setLanguage(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    if (value === 'en' || value === 'uk') this.i18n.setLanguage(value as SiteLanguage);
+  }
 
   ngOnInit(): void {
     this.auth.currentUser()

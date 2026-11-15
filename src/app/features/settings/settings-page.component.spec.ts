@@ -4,9 +4,9 @@ import { of, throwError } from 'rxjs';
 import { SubscriptionTier, UserContext } from '../../core/models/auth.models';
 import { AuthService } from '../../core/services/auth.service';
 import { WorkspaceService } from '../../core/services/workspace.service';
-import { AboutPageComponent } from './about-page.component';
+import { SettingsPageComponent } from './settings-page.component';
 
-describe('AboutPageComponent', () => {
+describe('SettingsPageComponent', () => {
   const user: UserContext = {
     id: '11111111-1111-1111-1111-111111111111',
     userName: 'Alex',
@@ -23,8 +23,10 @@ describe('AboutPageComponent', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    localStorage.removeItem('telemetry.language');
+    document.documentElement.lang = 'en';
     await TestBed.configureTestingModule({
-      imports: [AboutPageComponent],
+      imports: [SettingsPageComponent],
       providers: [
         { provide: AuthService, useValue: auth },
         { provide: WorkspaceService, useValue: workspaces },
@@ -34,7 +36,7 @@ describe('AboutPageComponent', () => {
   });
 
   it('shows the account and requires a second action before deletion', async () => {
-    const fixture = TestBed.createComponent(AboutPageComponent);
+    const fixture = TestBed.createComponent(SettingsPageComponent);
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -54,8 +56,35 @@ describe('AboutPageComponent', () => {
     expect(auth.deleteAccount).not.toHaveBeenCalled();
   });
 
+  it('changes the site language immediately and saves the choice', async () => {
+    const fixture = TestBed.createComponent(SettingsPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const picker = fixture.nativeElement.querySelector('#site-language') as HTMLSelectElement;
+    picker.value = 'uk';
+    picker.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+
+    expect(document.documentElement.lang).toBe('uk');
+    expect(localStorage.getItem('telemetry.language')).toBe('uk');
+    expect(fixture.nativeElement.querySelector('h1')?.textContent).toBe('Налаштування');
+  });
+
+  it('restores a saved language when the page opens', async () => {
+    localStorage.setItem('telemetry.language', 'uk');
+    const fixture = TestBed.createComponent(SettingsPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement.querySelector('#site-language') as HTMLSelectElement).value).toBe('uk');
+    expect(fixture.nativeElement.querySelector('h1')?.textContent).toBe('Налаштування');
+    expect(document.documentElement.lang).toBe('uk');
+  });
+
   it('deletes only the signed-in account and signs out after success', async () => {
-    const fixture = TestBed.createComponent(AboutPageComponent);
+    const fixture = TestBed.createComponent(SettingsPageComponent);
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -70,7 +99,7 @@ describe('AboutPageComponent', () => {
 
   it('keeps the user signed in when deletion fails', async () => {
     auth.deleteAccount.mockImplementationOnce(() => throwError(() => new Error('Request failed')));
-    const fixture = TestBed.createComponent(AboutPageComponent);
+    const fixture = TestBed.createComponent(SettingsPageComponent);
     fixture.detectChanges();
     await fixture.whenStable();
 

@@ -1,34 +1,34 @@
 <section class="servers-page">
   <header class="page-heading">
     <div>
-      <p class="eyebrow">INVENTORY</p>
-      <h1>All servers</h1>
-      <p class="muted">Servers you own and servers shared through your workspaces. Open a card to view its dashboard.</p>
+      <p class="eyebrow">{{ i18n.t('INVENTORY') }}</p>
+      <h1>{{ i18n.t('All servers') }}</h1>
+      <p class="muted">{{ i18n.t('Servers you own and servers shared through your workspaces. Open a card to view its dashboard.') }}</p>
     </div>
-    <button type="button" class="refresh-button" [disabled]="loading() || busy()" (click)="loadServers()">Refresh</button>
+    <button type="button" class="refresh-button" [disabled]="loading() || busy()" (click)="loadServers()">{{ i18n.t('Refresh') }}</button>
   </header>
 
-  @if (error()) { <p class="feedback error" role="alert">{{ error() }}</p> }
-  @if (message()) { <p class="feedback success" role="status">{{ message() }}</p> }
+  @if (error()) { <p class="feedback error" role="alert">{{ i18n.t(error()) }}</p> }
+  @if (message()) { <p class="feedback success" role="status">{{ i18n.t(message()) }}</p> }
 
   @if (loading()) {
-    <p class="empty-state">Loading servers…</p>
+    <p class="empty-state">{{ i18n.t('Loading servers…') }}</p>
   } @else if (servers().length === 0 && !error()) {
     <div class="empty-state">
-      <h2>No servers yet</h2>
-      <p>Add a server to start monitoring it.</p>
-      <a routerLink="/setup" class="add-link">Add server</a>
+      <h2>{{ i18n.t('No servers yet') }}</h2>
+      <p>{{ i18n.t('Add a server to start monitoring it.') }}</p>
+      <a routerLink="/setup" class="add-link">{{ i18n.t('Add server') }}</a>
     </div>
   } @else {
-    <p class="summary">{{ servers().length }} {{ servers().length === 1 ? 'server' : 'servers' }} in {{ groups().length }} {{ groups().length === 1 ? 'group' : 'groups' }}</p>
+    <p class="summary">{{ servers().length }} {{ i18n.plural(servers().length, 'server') }} {{ i18n.t('in') }} {{ groups().length }} {{ i18n.plural(groups().length, 'groupIn') }}</p>
     @for (group of groups(); track group.id) {
       <section class="server-group" [attr.aria-label]="group.name">
         <div class="group-heading">
           <div>
-            <p class="eyebrow">{{ group.id === 'personal' ? 'PERSONAL' : 'WORKSPACE' }}</p>
-            <h2>{{ group.name }}</h2>
+            <p class="eyebrow">{{ i18n.t(group.id === 'personal' ? 'PERSONAL' : 'WORKSPACE') }}</p>
+            <h2>{{ i18n.t(group.name) }}</h2>
           </div>
-          <span class="group-count">{{ group.servers.length }} {{ group.servers.length === 1 ? 'server' : 'servers' }}</span>
+          <span class="group-count">{{ group.servers.length }} {{ i18n.plural(group.servers.length, 'server') }}</span>
         </div>
         <div class="server-grid">
           @for (server of group.servers; track server.id) {
@@ -36,8 +36,8 @@
               <a class="server-link" routerLink="/dashboard" [queryParams]="{ instanceId: server.id }" (click)="setDashboardWorkspace(server)">
                 <span class="server-icon" aria-hidden="true">▣</span>
                 <span class="server-details">
-                  <strong>{{ server.name || 'Unnamed server' }}</strong>
-                  <span class="ownership">{{ canTransfer(server) ? 'Owned by you' : 'Shared server' }}</span>
+                  <strong>{{ server.name || i18n.t('Unnamed server') }}</strong>
+                  <span class="ownership">{{ i18n.t(canTransfer(server) ? 'Owned by you' : 'Shared server') }}</span>
                   <span class="server-id">{{ server.id }}</span>
                 </span>
                 <span class="open-arrow" aria-hidden="true">↗</span>
@@ -45,31 +45,31 @@
               @if (canTransfer(server)) {
                 <div class="card-actions">
                   <button type="button" class="transfer-toggle" [disabled]="busy()" [attr.aria-expanded]="transferInstanceId() === server.id" (click)="toggleTransfer(server)">
-                    {{ transferInstanceId() === server.id ? 'Cancel transfer' : 'Transfer server' }}
+                    {{ i18n.t(transferInstanceId() === server.id ? 'Cancel transfer' : 'Transfer server') }}
                   </button>
                 </div>
               }
               @if (transferInstanceId() === server.id) {
                 <form class="transfer-form" [formGroup]="transferForm" (ngSubmit)="transfer()">
-                  <label [for]="'transfer-mode-' + server.id">Transfer to</label>
+                  <label [for]="'transfer-mode-' + server.id">{{ i18n.t('Transfer to') }}</label>
                   <select [id]="'transfer-mode-' + server.id" formControlName="mode" [disabled]="busy()">
-                    @if (destinations().length) { <option value="workspace">Workspace</option> }
-                    <option value="owner">New owner</option>
+                    @if (destinations().length) { <option value="workspace">{{ i18n.t('Workspace') }}</option> }
+                    <option value="owner">{{ i18n.t('New owner') }}</option>
                   </select>
 
                   @if (mode.value === 'workspace') {
-                    <label [for]="'transfer-workspace-' + server.id">Destination workspace</label>
+                    <label [for]="'transfer-workspace-' + server.id">{{ i18n.t('Destination workspace') }}</label>
                     <select [id]="'transfer-workspace-' + server.id" formControlName="targetWorkspaceId" [disabled]="busy()">
-                      <option value="">Select workspace</option>
+                      <option value="">{{ i18n.t('Select workspace') }}</option>
                       @for (workspace of destinations(); track workspace.id) {
                         <option [value]="workspace.id">{{ workspace.workspaceName }}</option>
                       }
                     </select>
                   } @else {
-                    <label [for]="'transfer-owner-' + server.id">New owner's user ID</label>
+                    <label [for]="'transfer-owner-' + server.id">{{ i18n.t("New owner's user ID") }}</label>
                     <input [id]="'transfer-owner-' + server.id" type="text" formControlName="targetOwnerId" [disabled]="busy()" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off" />
                   }
-                  <button type="submit" class="submit-transfer" [disabled]="busy()">{{ busy() ? 'Transferring…' : 'Confirm transfer' }}</button>
+                  <button type="submit" class="submit-transfer" [disabled]="busy()">{{ i18n.t(busy() ? 'Transferring…' : 'Confirm transfer') }}</button>
                 </form>
               }
             </article>

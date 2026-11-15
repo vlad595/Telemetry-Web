@@ -42,9 +42,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/plan/plan-page.component').then((module) => module.PlanPageComponent),
       },
       {
-        path: 'about',
-        loadComponent: () => import('./features/about/about-page.component').then((module) => module.AboutPageComponent),
+        path: 'settings',
+        loadComponent: () => import('./features/settings/settings-page.component').then((module) => module.SettingsPageComponent),
       },
+      { path: 'about', pathMatch: 'full', redirectTo: 'settings' },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

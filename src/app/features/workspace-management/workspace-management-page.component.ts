@@ -5,6 +5,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { catchError, distinctUntilChanged, EMPTY, filter, finalize, Observable, skip, switchMap } from 'rxjs';
 import { WorkspaceRole } from '../../core/models/auth.models';
 import { WorkspaceService } from '../../core/services/workspace.service';
+import { LanguageService } from '../../core/services/language.service';
 
 @Component({
   standalone: true,
@@ -13,6 +14,7 @@ import { WorkspaceService } from '../../core/services/workspace.service';
   styleUrl: './workspace-management-page.component.css',
 })
 export class WorkspaceManagementPageComponent implements OnInit {
+  readonly i18n = inject(LanguageService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   readonly workspaces = inject(WorkspaceService);
@@ -101,7 +103,7 @@ export class WorkspaceManagementPageComponent implements OnInit {
       .subscribe({
         next: (invite) => {
           this.latestInviteCode.set(invite.inviteCode);
-          this.message.set(`Invitation code created. It expires ${new Date(invite.expiresAt).toLocaleString()}.`);
+          this.message.set(`Invitation code created. It expires ${this.i18n.formatDate(invite.expiresAt)}.`);
         },
         error: (error: unknown) => this.error.set(requestError(error, 'Could not create invitation.')),
       });
@@ -110,7 +112,7 @@ export class WorkspaceManagementPageComponent implements OnInit {
   removeMember(memberId: string, memberName: string): void {
     const workspaceId = this.selectedWorkspace()?.id;
     if (!workspaceId || this.busy()) return;
-    if (!window.confirm(`Remove ${memberName} from this workspace?`)) return;
+    if (!window.confirm(this.i18n.t(`Remove ${memberName} from this workspace?`))) return;
     this.error.set('');
     this.message.set('');
     this.busy.set(true);
@@ -145,7 +147,7 @@ export class WorkspaceManagementPageComponent implements OnInit {
   removeWorkspace(): void {
     const workspace = this.selectedWorkspace();
     if (!workspace || this.busy()) return;
-    if (!window.confirm(`Delete workspace “${workspace.workspaceName}”? This cannot be undone.`)) return;
+    if (!window.confirm(this.i18n.t(`Delete workspace “${workspace.workspaceName}”? This cannot be undone.`))) return;
     this.error.set('');
     this.message.set('');
     this.busy.set(true);

@@ -1,9 +1,9 @@
 <header class="app-header">
   <a class="brand" routerLink="/dashboard">Telemetry</a>
   <label class="workspace-picker" for="workspace-select">
-    <span>Workspace</span>
+    <span>{{ i18n.t('Workspace') }}</span>
     <select id="workspace-select" [formControl]="workspaceControl" [disabled]="loading()">
-      <option value="">My instances</option>
+      <option value="">{{ i18n.t('My instances') }}</option>
       @for (workspace of workspaceService.workspaces(); track workspace.id) {
         <option [value]="workspace.id">{{ workspace.workspaceName }}</option>
       }

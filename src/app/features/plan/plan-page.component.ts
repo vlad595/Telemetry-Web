@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
 import { SubscriptionTier } from '../../core/models/auth.models';
 import { AuthService } from '../../core/services/auth.service';
+import { LanguageService } from '../../core/services/language.service';
 
 interface PlanOption {
   tier: SubscriptionTier;
@@ -19,6 +20,7 @@ interface PlanOption {
   styleUrl: './plan-page.component.css',
 })
 export class PlanPageComponent implements OnInit {
+  readonly i18n = inject(LanguageService);
   private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 

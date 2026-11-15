@@ -8,6 +8,7 @@ import { Instance, Workspace, WorkspaceRole } from '../../core/models/auth.model
 import { AuthService } from '../../core/services/auth.service';
 import { InstanceService } from '../../core/services/instance.service';
 import { WorkspaceService } from '../../core/services/workspace.service';
+import { LanguageService } from '../../core/services/language.service';
 
 interface ServerGroup {
   id: string;
@@ -24,6 +25,7 @@ type TransferMode = 'workspace' | 'owner';
   styleUrl: './servers-page.component.css',
 })
 export class ServersPageComponent implements OnInit {
+  readonly i18n = inject(LanguageService);
   private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly instancesApi = inject(InstanceService);

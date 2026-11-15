@@ -4,6 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { WorkspaceService } from '../../../core/services/workspace.service';
+import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   standalone: true,
@@ -16,6 +17,7 @@ export class Header implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   readonly workspaceService = inject(WorkspaceService);
+  readonly i18n = inject(LanguageService);
   readonly loading = signal(true);
   readonly workspaceControl = new FormControl('', { nonNullable: true });
 

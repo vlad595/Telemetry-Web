@@ -1,18 +1,18 @@
 <section class="plan-page">
   <header class="page-heading">
-    <p class="eyebrow">SUBSCRIPTION</p>
-    <h1>Plan</h1>
-    <p class="muted">Choose the level of monitoring and analytics that fits your needs.</p>
+    <p class="eyebrow">{{ i18n.t('SUBSCRIPTION') }}</p>
+    <h1>{{ i18n.t('Plan') }}</h1>
+    <p class="muted">{{ i18n.t('Choose the level of monitoring and analytics that fits your needs.') }}</p>
   </header>
 
   @if (loading()) {
-    <p class="feedback" role="status">Loading your plan...</p>
+    <p class="feedback" role="status">{{ i18n.t('Loading your plan...') }}</p>
   }
   @if (error()) {
-    <p class="feedback error" role="alert">{{ error() }}</p>
+    <p class="feedback error" role="alert">{{ i18n.t(error()) }}</p>
   }
   @if (message()) {
-    <p class="feedback success" role="status">{{ message() }}</p>
+    <p class="feedback success" role="status">{{ i18n.t(message()) }}</p>
   }
 
   <div class="plan-grid">
@@ -21,21 +21,21 @@
         <div class="card-heading">
           <div>
             <h2>{{ plan.title }}</h2>
-            <p class="muted">{{ plan.summary }}</p>
+            <p class="muted">{{ i18n.t(plan.summary) }}</p>
           </div>
           @if (currentTier() === plan.tier) {
-            <span class="current-badge">Current</span>
+            <span class="current-badge">{{ i18n.t('Current') }}</span>
           }
         </div>
         <ul>
           @for (feature of plan.features; track feature) {
-            <li>{{ feature }}</li>
+            <li>{{ i18n.t(feature) }}</li>
           }
         </ul>
         <button type="button" class="primary-button" [class.secondary-button]="currentTier() === plan.tier"
           [disabled]="loading() || savingTier() !== null || currentTier() === null || currentTier() === plan.tier"
           (click)="changePlan(plan.tier)">
-          {{ savingTier() === plan.tier ? 'Updating...' : actionLabel(plan.tier) }}
+          {{ i18n.t(savingTier() === plan.tier ? 'Updating...' : actionLabel(plan.tier)) }}
         </button>
       </article>
     }

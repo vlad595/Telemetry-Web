@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { InstanceService } from '../../core/services/instance.service';
 import { MetricsStreamService } from '../../core/services/metrics-stream.service';
 import { WorkspaceService } from '../../core/services/workspace.service';
+import { LanguageService } from '../../core/services/language.service';
 import { environment } from '../../../environments/environment';
 
 type AgentPlatform = 'linux' | 'windows';
@@ -22,6 +23,7 @@ const RELEASE_PAGE = `https://raw.githubusercontent.com/vlad595/TelemetryCollect
   styleUrl: './setup-page.component.css',
 })
 export class SetupPageComponent implements OnInit, OnDestroy {
+  readonly i18n = inject(LanguageService);
   private readonly instances = inject(InstanceService);
   private readonly stream = inject(MetricsStreamService);
   private readonly workspaces = inject(WorkspaceService);

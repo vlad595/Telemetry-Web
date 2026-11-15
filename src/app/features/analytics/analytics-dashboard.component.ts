@@ -1,4 +1,4 @@
-import { isPlatformBrowser, DatePipe, DecimalPipe } from '@angular/common';
+import { isPlatformBrowser, DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AfterViewChecked, AfterViewInit, Component, DestroyRef, ElementRef, inject, Injector, Input, OnDestroy, OnInit, PLATFORM_ID, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
@@ -11,6 +11,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { AnalyticsService } from '../../core/services/analytics.service';
 import { InstanceService } from '../../core/services/instance.service';
 import { WorkspaceService } from '../../core/services/workspace.service';
+import { LanguageService } from '../../core/services/language.service';
 
 Chart.register(...registerables);
 
@@ -25,11 +26,12 @@ interface DashboardData {
 @Component({
   selector: 'app-analytics-dashboard',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, RouterLink],
+  imports: [DecimalPipe, RouterLink],
   templateUrl: './analytics-dashboard.component.html',
   styleUrl: './analytics-dashboard.component.css',
 })
 export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
+  readonly i18n = inject(LanguageService);
   private readonly api = inject(AnalyticsService);
   private readonly auth = inject(AuthService);
   private readonly instancesApi = inject(InstanceService);
@@ -384,7 +386,7 @@ export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, After
           labels: result.peaks.map((item) => item.period),
           datasets: [
             { label: 'P95 CPU', data: result.peaks.map((item) => item.p95Cpu), borderColor: '#315e58', tension: 0.2 },
-            { label: 'P95 Memory', data: result.peaks.map((item) => item.p95Memory), borderColor: '#8a9b68', tension: 0.2 },
+            { label: this.i18n.t('P95 Memory'), data: result.peaks.map((item) => item.p95Memory), borderColor: '#8a9b68', tension: 0.2 },
           ],
         },
         options: chartOptions,
@@ -396,8 +398,8 @@ export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, After
         data: {
           labels: result.networkTrends.map((item) => item.period),
           datasets: [
-            { label: 'Received MB', data: result.networkTrends.map((item) => item.totalRxMegabytes), backgroundColor: '#315e58' },
-            { label: 'Transmitted MB', data: result.networkTrends.map((item) => item.totalTxMegabytes), backgroundColor: '#8a9b68' },
+            { label: this.i18n.t('Received MB'), data: result.networkTrends.map((item) => item.totalRxMegabytes), backgroundColor: '#315e58' },
+            { label: this.i18n.t('Transmitted MB'), data: result.networkTrends.map((item) => item.totalTxMegabytes), backgroundColor: '#8a9b68' },
           ],
         },
         options: chartOptions,

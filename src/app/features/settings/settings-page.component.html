@@ -1,0 +1,54 @@
+<section class="settings-page">
+  <header class="page-heading">
+    <p class="eyebrow">{{ i18n.t('ACCOUNT') }}</p>
+    <h1>{{ i18n.t('Settings') }}</h1>
+    <p class="muted">{{ i18n.t('Your account information and site preferences.') }}</p>
+  </header>
+
+  <section class="panel" aria-labelledby="language-heading">
+    <h2 id="language-heading">{{ i18n.t('Appearance and language') }}</h2>
+    <label class="language-picker" for="site-language">{{ i18n.t('Site language') }}</label>
+    <select id="site-language" [value]="i18n.language()" (change)="setLanguage($event)">
+      <option value="en">English</option>
+      <option value="uk">Українська</option>
+    </select>
+    <p class="muted language-help">{{ i18n.t('Choose the language used throughout Telemetry.') }}</p>
+  </section>
+
+  @if (loading()) {
+    <p class="feedback" role="status">{{ i18n.t('Loading your account…') }}</p>
+  }
+  @if (error()) {
+    <p class="feedback error" role="alert">{{ i18n.t(error()) }}</p>
+  }
+
+  @if (user(); as account) {
+    <section class="panel" aria-labelledby="account-heading">
+      <h2 id="account-heading">{{ i18n.t('Profile') }}</h2>
+      <dl class="account-details">
+        <div><dt>ID</dt><dd class="account-id">{{ account.id }}</dd></div>
+        <div><dt>{{ i18n.t('Name') }}</dt><dd>{{ account.userName }}</dd></div>
+        <div><dt>{{ i18n.t('Email') }}</dt><dd>{{ account.email }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="panel danger-zone" aria-labelledby="delete-heading">
+      <h2 id="delete-heading">{{ i18n.t('Delete account') }}</h2>
+      <p class="muted">{{ i18n.t('Permanently remove your account when you no longer need it.') }}</p>
+      @if (!confirming()) {
+        <button type="button" class="danger-button" (click)="showDeleteConfirmation()">{{ i18n.t('Delete account') }}</button>
+      } @else {
+        <div class="confirmation" role="group" aria-labelledby="confirm-heading">
+          <h3 id="confirm-heading">{{ i18n.t('Are you sure?') }}</h3>
+          <p>{{ i18n.t('This deletes your account, your servers, and workspaces you own. Other members lose access to those workspaces; their servers remain with them.') }}</p>
+          <div class="confirmation-actions">
+            <button type="button" class="secondary-button" [disabled]="deleting()" (click)="cancelDelete()">{{ i18n.t('Cancel') }}</button>
+            <button type="button" class="danger-button" [disabled]="deleting()" (click)="deleteAccount()">
+              {{ i18n.t(deleting() ? 'Deleting account…' : 'Yes, delete my account') }}
+            </button>
+          </div>
+        </div>
+      }
+    </section>
+  }
+</section>

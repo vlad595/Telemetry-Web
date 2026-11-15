@@ -5,6 +5,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
+import { LanguageService } from '../../core/services/language.service';
 
 type AuthMode = 'login' | 'register';
 
@@ -16,6 +17,7 @@ type AuthMode = 'login' | 'register';
   styleUrl: './auth-page.component.css',
 })
 export class AuthPageComponent {
+  readonly i18n = inject(LanguageService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);

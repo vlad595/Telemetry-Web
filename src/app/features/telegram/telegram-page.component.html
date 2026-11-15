@@ -1,55 +1,55 @@
 <section class="telegram-page">
   <header class="page-heading">
-    <p class="eyebrow">NOTIFICATIONS</p>
+    <p class="eyebrow">{{ i18n.t('NOTIFICATIONS') }}</p>
     <h1>Telegram</h1>
-    <p class="muted">Choose which metric readings should send alerts to your Telegram chat.</p>
+    <p class="muted">{{ i18n.t('Choose which metric readings should send alerts to your Telegram chat.') }}</p>
   </header>
 
   @if (!loading() && notificationsAvailable() === false) {
     <div class="connection-card">
-      <h2>Notifications are available on Tier 2 and Tier 1</h2>
-      <p class="muted">Upgrade your plan to connect Telegram and receive alerts based on your rules.</p>
-      <a class="primary-button link-button" routerLink="/plan">View plans</a>
+      <h2>{{ i18n.t('Notifications are available on Tier 2 and Tier 1') }}</h2>
+      <p class="muted">{{ i18n.t('Upgrade your plan to connect Telegram and receive alerts based on your rules.') }}</p>
+      <a class="primary-button link-button" routerLink="/plan">{{ i18n.t('View plans') }}</a>
     </div>
   } @else {
   <div class="connection-card">
     <div class="status-row">
       <div>
-        <h2>Bot connection</h2>
-        <p class="muted">Your Telegram account is linked to your Telemetry profile.</p>
+        <h2>{{ i18n.t('Bot connection') }}</h2>
+        <p class="muted">{{ i18n.t('Your Telegram account is linked to your Telemetry profile.') }}</p>
       </div>
       @if (loading()) {
-        <span class="status">Checking...</span>
+        <span class="status">{{ i18n.t('Checking...') }}</span>
       } @else {
-        <span class="status" [class.connected]="connected()">{{ connected() ? 'Connected' : 'Not connected' }}</span>
+        <span class="status" [class.connected]="connected()">{{ i18n.t(connected() ? 'Connected' : 'Not connected') }}</span>
       }
     </div>
 
     @if (error()) {
-      <p class="feedback error" role="alert">{{ error() }}</p>
+      <p class="feedback error" role="alert">{{ i18n.t(error()) }}</p>
     }
     @if (message()) {
-      <p class="feedback" role="status">{{ message() }}</p>
+      <p class="feedback" role="status">{{ i18n.t(message()) }}</p>
     }
 
     @if (!loading()) {
       @if (connected()) {
-        <p>Metrics from your instances and workspaces can trigger the rules below.</p>
-        <button type="button" class="secondary-button" [disabled]="busy()" (click)="disconnect()">Disconnect Telegram</button>
+        <p>{{ i18n.t('Metrics from your instances and workspaces can trigger the rules below.') }}</p>
+        <button type="button" class="secondary-button" [disabled]="busy()" (click)="disconnect()">{{ i18n.t('Disconnect Telegram') }}</button>
       } @else {
         <ol class="steps">
-          <li>Create a connection link.</li>
-          <li>Open the bot in Telegram and tap <strong>Start</strong>.</li>
-          <li>Return here and check the connection.</li>
+          <li>{{ i18n.t('Create a connection link.') }}</li>
+          <li>{{ i18n.t('Open the bot in Telegram and tap') }} <strong>Start</strong>.</li>
+          <li>{{ i18n.t('Return here and check the connection.') }}</li>
         </ol>
         <div class="actions">
           <button type="button" class="primary-button" [disabled]="busy()" (click)="generateLink()">
-            {{ link() ? 'Generate link again' : 'Create connection link' }}
+            {{ i18n.t(link() ? 'Generate link again' : 'Create connection link') }}
           </button>
           @if (link()) {
-            <a class="primary-button link-button" [href]="link()" target="_blank" rel="noopener noreferrer">Open Telegram bot</a>
+            <a class="primary-button link-button" [href]="link()" target="_blank" rel="noopener noreferrer">{{ i18n.t('Open Telegram bot') }}</a>
           }
-          <button type="button" class="secondary-button" [disabled]="busy()" (click)="refreshStatus()">Check connection</button>
+          <button type="button" class="secondary-button" [disabled]="busy()" (click)="refreshStatus()">{{ i18n.t('Check connection') }}</button>
         </div>
       }
     }
@@ -58,25 +58,25 @@
   <section class="rules-card" aria-labelledby="rules-heading">
     <div class="rules-heading">
       <div>
-        <h2 id="rules-heading">Alert rules</h2>
-        <p class="muted">An alert is sent when any one of your rules matches a metric reading.</p>
+        <h2 id="rules-heading">{{ i18n.t('Alert rules') }}</h2>
+        <p class="muted">{{ i18n.t('An alert is sent when any one of your rules matches a metric reading.') }}</p>
       </div>
       @if (!loading()) {
-        <span class="rule-count">{{ rules().length }} {{ rules().length === 1 ? 'rule' : 'rules' }}</span>
+        <span class="rule-count">{{ rules().length }} {{ i18n.plural(rules().length, 'rule') }}</span>
       }
     </div>
 
     <form class="rule-form" (ngSubmit)="addRule()">
       <label>
-        <span>Metric field</span>
+        <span>{{ i18n.t('Metric field') }}</span>
         <select name="field" [(ngModel)]="selectedField" [disabled]="loading() || rulesBusy()">
           @for (field of fieldOptions; track field.value) {
-            <option [value]="field.value">{{ field.label }}</option>
+            <option [value]="field.value">{{ i18n.t(field.label) }}</option>
           }
         </select>
       </label>
       <label>
-        <span>Condition</span>
+        <span>{{ i18n.t('Condition') }}</span>
         <select name="operator" [(ngModel)]="selectedOperator" [disabled]="loading() || rulesBusy()">
           @for (operator of operators; track operator) {
             <option [value]="operator">{{ operator }}</option>
@@ -84,33 +84,33 @@
         </select>
       </label>
       <label>
-        <span>Value</span>
-        <input name="threshold" type="number" step="any" required placeholder="e.g. 80"
+        <span>{{ i18n.t('Value') }}</span>
+        <input name="threshold" type="number" step="any" required [placeholder]="i18n.t('e.g. 80')"
           [(ngModel)]="threshold" [disabled]="loading() || rulesBusy()" />
       </label>
       <button class="primary-button" type="submit" [disabled]="loading() || rulesBusy() || threshold === null">
-        {{ rulesBusy() ? 'Saving...' : 'Add rule' }}
+        {{ i18n.t(rulesBusy() ? 'Saving...' : 'Add rule') }}
       </button>
     </form>
 
     @if (ruleError()) {
-      <p class="feedback error" role="alert">{{ ruleError() }}</p>
+      <p class="feedback error" role="alert">{{ i18n.t(ruleError()) }}</p>
     }
     @if (ruleMessage()) {
-      <p class="feedback" role="status">{{ ruleMessage() }}</p>
+      <p class="feedback" role="status">{{ i18n.t(ruleMessage()) }}</p>
     }
 
     @if (loading()) {
-      <p class="muted">Loading rules...</p>
+      <p class="muted">{{ i18n.t('Loading rules...') }}</p>
     } @else if (rules().length === 0) {
-      <p class="empty-rules">No rules yet. Add one above to start filtering notifications.</p>
+      <p class="empty-rules">{{ i18n.t('No rules yet. Add one above to start filtering notifications.') }}</p>
     } @else {
       <ul class="rule-list">
         @for (rule of rules(); track rule) {
           <li>
             <code>{{ rule }}</code>
             <button type="button" class="secondary-button" [disabled]="rulesBusy()"
-              [attr.aria-label]="'Remove rule ' + rule" (click)="removeRule(rule)">Remove</button>
+              [attr.aria-label]="i18n.t('Remove rule') + ' ' + rule" (click)="removeRule(rule)">{{ i18n.t('Remove') }}</button>
           </li>
         }
       </ul>

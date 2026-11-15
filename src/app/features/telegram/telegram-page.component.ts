@@ -7,6 +7,7 @@ import { finalize, forkJoin, of, switchMap } from 'rxjs';
 import { SubscriptionTier } from '../../core/models/auth.models';
 import { AlertRulesService } from '../../core/services/alert-rules.service';
 import { AuthService } from '../../core/services/auth.service';
+import { LanguageService } from '../../core/services/language.service';
 
 @Component({
   selector: 'app-telegram-page',
@@ -16,6 +17,7 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrl: './telegram-page.component.css',
 })
 export class TelegramPageComponent implements OnInit {
+  readonly i18n = inject(LanguageService);
   private readonly auth = inject(AuthService);
   private readonly alertRules = inject(AlertRulesService);
   private readonly destroyRef = inject(DestroyRef);
