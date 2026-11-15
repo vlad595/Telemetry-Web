@@ -81,4 +81,25 @@ describe('ServersPageComponent', () => {
     expect(instanceApi.transferToWorkspace).toHaveBeenCalledWith(personal.id, workspaceId);
     expect(page.message()).toContain('transferred');
   });
+
+  it('submits an owner transfer without navigating away from the page', async () => {
+    const fixture = TestBed.createComponent(ServersPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const page = fixture.componentInstance;
+    const newOwnerId = '66666666-6666-6666-6666-666666666666';
+    page.toggleTransfer(personal);
+    page.mode.setValue('owner');
+    page.targetOwnerId.setValue(newOwnerId);
+    fixture.detectChanges();
+
+    const form = fixture.nativeElement.querySelector('.transfer-form') as HTMLFormElement;
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+    form.dispatchEvent(submitEvent);
+
+    expect(submitEvent.defaultPrevented).toBe(true);
+    expect(instanceApi.transferToOwner).toHaveBeenCalledWith(personal.id, newOwnerId);
+    expect(page.message()).toContain('transferred');
+  });
 });

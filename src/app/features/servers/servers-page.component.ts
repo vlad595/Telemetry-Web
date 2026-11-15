@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { catchError, finalize, forkJoin, of, switchMap, throwError } from 'rxjs';
 import { Instance, Workspace, WorkspaceRole } from '../../core/models/auth.models';
@@ -39,6 +39,11 @@ export class ServersPageComponent implements OnInit {
   readonly mode = new FormControl<TransferMode>('workspace', { nonNullable: true });
   readonly targetWorkspaceId = new FormControl('', { nonNullable: true });
   readonly targetOwnerId = new FormControl('', { nonNullable: true });
+  readonly transferForm = new FormGroup({
+    mode: this.mode,
+    targetWorkspaceId: this.targetWorkspaceId,
+    targetOwnerId: this.targetOwnerId,
+  });
 
   readonly groups = computed<ServerGroup[]>(() => {
     const knownWorkspaces = this.workspaces.workspaces();

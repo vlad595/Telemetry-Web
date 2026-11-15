@@ -50,16 +50,16 @@
                 </div>
               }
               @if (transferInstanceId() === server.id) {
-                <form class="transfer-form" (ngSubmit)="transfer()">
+                <form class="transfer-form" [formGroup]="transferForm" (ngSubmit)="transfer()">
                   <label [for]="'transfer-mode-' + server.id">Transfer to</label>
-                  <select [id]="'transfer-mode-' + server.id" [formControl]="mode" [disabled]="busy()">
+                  <select [id]="'transfer-mode-' + server.id" formControlName="mode" [disabled]="busy()">
                     @if (destinations().length) { <option value="workspace">Workspace</option> }
                     <option value="owner">New owner</option>
                   </select>
 
                   @if (mode.value === 'workspace') {
                     <label [for]="'transfer-workspace-' + server.id">Destination workspace</label>
-                    <select [id]="'transfer-workspace-' + server.id" [formControl]="targetWorkspaceId" [disabled]="busy()">
+                    <select [id]="'transfer-workspace-' + server.id" formControlName="targetWorkspaceId" [disabled]="busy()">
                       <option value="">Select workspace</option>
                       @for (workspace of destinations(); track workspace.id) {
                         <option [value]="workspace.id">{{ workspace.workspaceName }}</option>
@@ -67,7 +67,7 @@
                     </select>
                   } @else {
                     <label [for]="'transfer-owner-' + server.id">New owner's user ID</label>
-                    <input [id]="'transfer-owner-' + server.id" type="text" [formControl]="targetOwnerId" [disabled]="busy()" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off" />
+                    <input [id]="'transfer-owner-' + server.id" type="text" formControlName="targetOwnerId" [disabled]="busy()" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off" />
                   }
                   <button type="submit" class="submit-transfer" [disabled]="busy()">{{ busy() ? 'Transferring…' : 'Confirm transfer' }}</button>
                 </form>
