@@ -40,7 +40,7 @@ input[type="range"] { min-height: 20px; padding: 0; accent-color: var(--accent);
 .rule-row { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr auto; align-items: end; gap: 8px; }
 .rule-row input, .rule-row select { width: 100%; min-width: 0; }
 .secondary { border-color: var(--border); background: var(--surface); color: var(--ink); }
-.chart-wrap { position: relative; min-height: 300px; }
+.chart-wrap { position: relative; height: 300px; }
 .chart-wrap[hidden] { display: none; }
 button { min-height: 38px; padding: 8px 12px; border: 1px solid var(--accent); border-radius: 0; background: var(--accent); color: #fff; font: inherit; cursor: pointer; }
 button:disabled { opacity: .6; cursor: wait; }
@@ -56,5 +56,5 @@ th { color: var(--muted); font-size: 12px; font-weight: 600; }
   .snapshot-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .section-heading { align-items: flex-start; flex-direction: column; }
   .timeline-control { padding: 16px; }
-  .chart-wrap { min-height: 240px; }
+  .chart-wrap { height: 240px; }
 }

@@ -1,6 +1,6 @@
 import { isPlatformBrowser, DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AfterViewChecked, AfterViewInit, Component, DestroyRef, ElementRef, inject, Injector, Input, OnDestroy, OnInit, PLATFORM_ID, signal, ViewChild } from '@angular/core';
+import { afterNextRender, Component, DestroyRef, ElementRef, inject, Injector, Input, OnDestroy, OnInit, PLATFORM_ID, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
@@ -30,7 +30,7 @@ interface DashboardData {
   templateUrl: './analytics-dashboard.component.html',
   styleUrl: './analytics-dashboard.component.css',
 })
-export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
+export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
   readonly i18n = inject(LanguageService);
   private readonly api = inject(AnalyticsService);
   private readonly auth = inject(AuthService);
@@ -142,7 +142,7 @@ export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, After
         this.loading.set(false);
         if (!result) return;
         this.data.set(result);
-        this.renderCharts();
+        afterNextRender(() => this.renderCharts(), { injector: this.injector });
       });
 
     this.snapshotRequests
@@ -249,20 +249,6 @@ export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, After
       });
   }
 
-  ngAfterViewInit(): void {
-    this.renderCharts();
-  }
-
-  ngAfterViewChecked(): void {
-    const result = this.data();
-    // @if creates canvases after data changes. Retry after the view has rendered so
-    // charts appear on first page load without requiring a custom query interaction.
-    if (result && ((result.peaks.length > 0 && !this.peaksChart) || (result.networkTrends.length > 0 && !this.networkChart))) {
-      this.renderCharts();
-    }
-    if (this.customPoints().length > 0 && !this.customChart) this.renderCustomChart();
-  }
-
   ngOnDestroy(): void {
     this.destroyCharts();
   }
@@ -306,7 +292,7 @@ export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, After
       .subscribe({
         next: (points) => {
           this.customPoints.set(points);
-          this.renderCustomChart();
+          afterNextRender(() => this.renderCustomChart(), { injector: this.injector });
         },
         error: (error: unknown) => {
           this.customError.set(requestError(error, 'Custom analytics request failed.'));
