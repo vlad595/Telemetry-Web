@@ -1,11 +1,11 @@
 import { isPlatformBrowser, DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { afterNextRender, Component, DestroyRef, ElementRef, inject, Injector, Input, OnDestroy, OnInit, PLATFORM_ID, signal, ViewChild } from '@angular/core';
+import { afterNextRender, Component, computed, DestroyRef, ElementRef, inject, Injector, Input, OnDestroy, OnInit, PLATFORM_ID, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
 import { auditTime, catchError, distinctUntilChanged, forkJoin, finalize, map, of, startWith, Subject, switchMap, takeUntil, tap } from 'rxjs';
-import { AnalyticsGroupingInterval, AnomalyDto, CustomAnalyticsPoint, CustomMetricRule, DailyPeakDto, DiskConsumptionDto, DynamicAnalyticsRequest, HealthScoreDto, MetricAggregation, MetricSnapshot, NetworkTrendDto } from '../../core/models/analytics.models';
+import { AnalyticsGroupingInterval, AnomalyDto, CustomAnalyticsPoint, CustomMetricRule, DiskConsumptionDto, DynamicAnalyticsRequest, HealthScoreDto, HourlyPeakDto, MetricAggregation, MetricSnapshot, NetworkTrendDto } from '../../core/models/analytics.models';
 import { Instance } from '../../core/models/auth.models';
 import { AuthService } from '../../core/services/auth.service';
 import { AnalyticsService } from '../../core/services/analytics.service';
@@ -16,7 +16,7 @@ import { LanguageService } from '../../core/services/language.service';
 Chart.register(...registerables);
 
 interface DashboardData {
-  peaks: DailyPeakDto[];
+  peaks: HourlyPeakDto[];
   networkTrends: NetworkTrendDto[];
   diskConsumption: DiskConsumptionDto;
   healthScore: HealthScoreDto;
@@ -56,6 +56,11 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
   readonly snapshotError = signal('');
   readonly timeRangeLoading = signal(false);
   readonly selectedTimestamp = signal(Date.now());
+  readonly previousDayEnd = computed(() => {
+    const selected = new Date(this.selectedTimestamp());
+    return Date.UTC(selected.getUTCFullYear(), selected.getUTCMonth(), selected.getUTCDate());
+  });
+  readonly previousDayStart = computed(() => this.previousDayEnd() - 24 * 60 * 60 * 1000);
   readonly timePosition = signal(1000);
   readonly timelineStart = signal(Date.now());
   readonly timelineEnd = signal(Date.now());
@@ -63,6 +68,7 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
   readonly loading = signal(true);
   readonly customLoading = signal(false);
   readonly error = signal('');
+  readonly peakError = signal('');
   readonly customError = signal('');
   readonly maxHistoryHours = signal(168);
   readonly customHours = signal(24);
@@ -96,7 +102,7 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
   @ViewChild('networkCanvas') private networkCanvas?: ElementRef<HTMLCanvasElement>;
   @ViewChild('customCanvas') private customCanvas?: ElementRef<HTMLCanvasElement>;
 
-  private peaksChart?: Chart<'line', number[], string>;
+  private peaksChart?: Chart<'line', (number | null)[], string>;
   private networkChart?: Chart<'bar', number[], string>;
   private customChart?: Chart<'line', number[], string>;
   private requestedAgentId = '';
@@ -120,6 +126,7 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
           if (!request) return;
           this.loading.set(true);
           this.error.set('');
+          this.peakError.set('');
           this.data.set(null);
           this.customPoints.set([]);
           this.customError.set('');
@@ -131,7 +138,14 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
           const { agentId } = request;
           const at = new Date(request.at).toISOString();
           return forkJoin({
-            peaks: this.api.getPeaks(agentId, 1, at),
+            peaks: this.api.getPreviousDayPeaks(agentId, at).pipe(
+              catchError((error: unknown) => {
+                this.peakError.set(error instanceof HttpErrorResponse && error.status === 400
+                  ? 'The previous UTC day is outside the available history.'
+                  : 'Could not load P95 for the previous UTC day.');
+                return of([]);
+              }),
+            ),
             networkTrends: this.api.getNetworkTrends(agentId, 24, at),
             diskConsumption: this.api.getDiskConsumption(agentId, 1, at),
             healthScore: this.api.getHealthScore(agentId, 24, at),
@@ -387,16 +401,30 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
     if (!result) return;
     const chartOptions = { responsive: true, maintainAspectRatio: false } as const;
     if (result.peaks.length > 0 && this.peaksCanvas?.nativeElement && !this.peaksChart) {
+      const locale = this.i18n.language() === 'uk' ? 'uk-UA' : 'en-US';
+      const hourFormatter = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'UTC' });
+      const percentFormatter = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+      const peaksByHour = new Map(result.peaks.map((item) => [new Date(item.period).getTime(), item]));
+      const hours = Array.from({ length: 25 }, (_, hour) => this.previousDayStart() + hour * 60 * 60 * 1000);
+      const hourlyPeaks = hours.map((hour) => peaksByHour.get(hour));
       this.peaksChart = new Chart(this.peaksCanvas.nativeElement, {
         type: 'line',
         data: {
-          labels: result.peaks.map((item) => item.period),
+          labels: hours.map((hour) => hourFormatter.format(hour)),
           datasets: [
-            { label: 'P95 CPU', data: result.peaks.map((item) => item.p95Cpu), borderColor: '#315e58', tension: 0.2 },
-            { label: this.i18n.t('P95 Memory'), data: result.peaks.map((item) => item.p95Memory), borderColor: '#8a9b68', tension: 0.2 },
+            { label: 'P95 CPU', data: hourlyPeaks.map((peak) => peak ? peak.p95Cpu * 100 : null), borderColor: '#315e58', pointRadius: 5, tension: 0.2 },
+            { label: this.i18n.t('P95 Memory'), data: hourlyPeaks.map((peak) => peak ? peak.p95Memory * 100 : null), borderColor: '#8a9b68', pointRadius: 5, tension: 0.2 },
           ],
         },
-        options: chartOptions,
+        options: {
+          ...chartOptions,
+          scales: {
+            y: { min: 0, max: 100, ticks: { callback: (value) => `${value}%` } },
+          },
+          plugins: {
+            tooltip: { callbacks: { label: (context) => context.parsed.y === null ? '' : `${context.dataset.label}: ${percentFormatter.format(context.parsed.y)}%` } },
+          },
+        },
       });
     }
     if (result.networkTrends.length > 0 && this.networkCanvas?.nativeElement && !this.networkChart) {

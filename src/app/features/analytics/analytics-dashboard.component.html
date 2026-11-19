@@ -21,7 +21,7 @@
 @if (selectedAgentId()) {
   <section class="panel timeline-control">
     <div class="section-heading">
-      <div><h2>{{ i18n.t('Timeline (UTC)') }}</h2><p>{{ i18n.t('Selected:') }} {{ i18n.formatDate(selectedTimestamp(), 'full', true) }}</p><p>{{ i18n.t('Dashboard analytics covers up to 24 hours before the selected time.') }}</p></div>
+      <div><h2>{{ i18n.t('Timeline (UTC)') }}</h2><p>{{ i18n.t('Selected:') }} {{ i18n.formatDate(selectedTimestamp(), 'full', true) }}</p><p>{{ i18n.t('Network, disk, health, and anomaly analytics cover the 24 hours before the selected time. P95 covers the previous UTC day.') }}</p></div>
       @if (timeRangeLoading()) { <span class="muted">{{ i18n.t('Loading available data...') }}</span> }
     </div>
     <label class="time-picker">
@@ -64,8 +64,8 @@
     </div>
     @if (snapshot(); as point) {
       <div class="kpi-grid snapshot-grid">
-        <article class="panel kpi-card"><span>CPU</span><strong>{{ point.cpuUsage | number: '1.0-2' }}%</strong></article>
-        <article class="panel kpi-card"><span>{{ i18n.t('Memory') }}</span><strong>{{ point.memoryUsage | number: '1.0-2' }}%</strong></article>
+        <article class="panel kpi-card"><span>CPU</span><strong>{{ point.cpuUsage * 100 | number: '1.0-2' }}%</strong></article>
+        <article class="panel kpi-card"><span>{{ i18n.t('Memory') }}</span><strong>{{ point.memoryUsage * 100 | number: '1.0-2' }}%</strong></article>
         <article class="panel kpi-card"><span>{{ i18n.t('Disk space') }}</span><strong>{{ point.diskSpace | number: '1.0-2' }}</strong></article>
         <article class="panel kpi-card"><span>{{ i18n.t('Network received') }}</span><strong>{{ point.networkRxBytes | number: '1.0-0' }} B/s</strong></article>
         <article class="panel kpi-card"><span>{{ i18n.t('Network sent') }}</span><strong>{{ point.networkTxBytes | number: '1.0-0' }} B/s</strong></article>
@@ -92,11 +92,16 @@
   </section>
 
   <section class="panel chart-panel">
-    <div class="section-heading"><div><h2>{{ i18n.t('Daily peaks') }}</h2><p>{{ i18n.t('P95 CPU and memory') }}</p></div></div>
-    @if (dashboard.peaks.length > 0) {
-      <div class="chart-wrap"><canvas #peaksCanvas [attr.aria-label]="i18n.t('Daily P95 CPU and memory line chart')"></canvas></div>
+    <div class="section-heading"><div><h2>{{ i18n.t('Hourly P95 for the previous UTC day') }}</h2><p>{{ i18n.t('Start') }}: {{ i18n.formatDate(previousDayStart(), 'medium', true) }} UTC · {{ i18n.t('End') }}: {{ i18n.formatDate(previousDayEnd(), 'medium', true) }} UTC</p><p>{{ i18n.t('Each point summarizes the hour starting at its label.') }}</p></div></div>
+    @if (peakError()) {
+      <p class="muted">{{ i18n.t(peakError()) }}</p>
+    } @else if (dashboard.peaks.length > 0) {
+      @if (dashboard.peaks.length === 1) {
+        <p class="muted">{{ i18n.t('Only one hour has measurements in the previous UTC day.') }} P95 CPU: {{ dashboard.peaks[0].p95Cpu * 100 | number: '1.0-1' }}%; {{ i18n.t('P95 Memory') }}: {{ dashboard.peaks[0].p95Memory * 100 | number: '1.0-1' }}%.</p>
+      }
+      <div class="chart-wrap"><canvas #peaksCanvas [attr.aria-label]="i18n.t('Hourly P95 CPU and memory line chart')"></canvas></div>
     } @else {
-      <p class="muted">{{ i18n.t('No peak data for this period.') }}</p>
+      <p class="muted">{{ i18n.t('No measurements in the previous UTC day.') }}</p>
     }
   </section>
 

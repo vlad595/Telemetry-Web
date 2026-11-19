@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import {
   AnomalyDto,
   DailyPeakDto,
+  HourlyPeakDto,
   DiskConsumptionDto,
   DynamicAnalyticsRequest,
   HealthScoreDto,
@@ -22,6 +23,12 @@ export class AnalyticsService {
   getPeaks(agentId: string, daysAgo = 7, at?: string): Observable<DailyPeakDto[]> {
     return this.http.get<DailyPeakDto[]>(`${this.baseUrl}/agent/${encodeURIComponent(agentId)}/peaks`, {
       params: new HttpParams().set('daysAgo', daysAgo).set('at', at ?? new Date().toISOString()),
+    });
+  }
+
+  getPreviousDayPeaks(agentId: string, at: string): Observable<HourlyPeakDto[]> {
+    return this.http.get<HourlyPeakDto[]>(`${this.baseUrl}/agent/${encodeURIComponent(agentId)}/previous-day-peaks`, {
+      params: new HttpParams().set('at', at),
     });
   }
 

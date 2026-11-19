@@ -32,6 +32,12 @@ export interface DailyPeakDto {
   p95Memory: number;
 }
 
+export interface HourlyPeakDto {
+  period: string;
+  p95Cpu: number;
+  p95Memory: number;
+}
+
 export interface NetworkTrendDto {
   period: string;
   totalRxMegabytes: number;
