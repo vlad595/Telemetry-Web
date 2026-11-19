@@ -19,15 +19,15 @@ export class AnalyticsService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.analyticsApiUrl}/api/analytics`;
 
-  getPeaks(agentId: string, daysAgo = 7): Observable<DailyPeakDto[]> {
+  getPeaks(agentId: string, daysAgo = 7, at?: string): Observable<DailyPeakDto[]> {
     return this.http.get<DailyPeakDto[]>(`${this.baseUrl}/agent/${encodeURIComponent(agentId)}/peaks`, {
-      params: new HttpParams().set('daysAgo', daysAgo),
+      params: new HttpParams().set('daysAgo', daysAgo).set('at', at ?? new Date().toISOString()),
     });
   }
 
-  getNetworkTrends(agentId: string, hoursAgo = 24): Observable<NetworkTrendDto[]> {
+  getNetworkTrends(agentId: string, hoursAgo = 24, at?: string): Observable<NetworkTrendDto[]> {
     return this.http.get<NetworkTrendDto[]>(`${this.baseUrl}/agent/${encodeURIComponent(agentId)}/network-trends`, {
-      params: new HttpParams().set('hoursAgo', hoursAgo),
+      params: new HttpParams().set('hoursAgo', hoursAgo).set('at', at ?? new Date().toISOString()),
     });
   }
 
@@ -47,21 +47,21 @@ export class AnalyticsService {
     return this.http.get<MetricTimeRange>(`${this.baseUrl}/agent/${encodeURIComponent(agentId)}/time-range`);
   }
 
-  getDiskConsumption(agentId: string, daysAgo = 30): Observable<DiskConsumptionDto> {
+  getDiskConsumption(agentId: string, daysAgo = 30, at?: string): Observable<DiskConsumptionDto> {
     return this.http.get<DiskConsumptionDto>(`${this.baseUrl}/agent/${encodeURIComponent(agentId)}/disk-consumption`, {
-      params: new HttpParams().set('daysAgo', daysAgo),
+      params: new HttpParams().set('daysAgo', daysAgo).set('at', at ?? new Date().toISOString()),
     });
   }
 
-  getHealthScore(agentId: string, hoursAgo = 24): Observable<HealthScoreDto> {
+  getHealthScore(agentId: string, hoursAgo = 24, at?: string): Observable<HealthScoreDto> {
     return this.http.get<HealthScoreDto>(`${this.baseUrl}/agent/${encodeURIComponent(agentId)}/health-score`, {
-      params: new HttpParams().set('hoursAgo', hoursAgo),
+      params: new HttpParams().set('hoursAgo', hoursAgo).set('at', at ?? new Date().toISOString()),
     });
   }
 
-  getAnomalies(agentId: string, hoursAgo = 24): Observable<AnomalyDto[]> {
+  getAnomalies(agentId: string, hoursAgo = 24, at?: string): Observable<AnomalyDto[]> {
     return this.http.get<AnomalyDto[]>(`${this.baseUrl}/agent/${encodeURIComponent(agentId)}/anomalies`, {
-      params: new HttpParams().set('hoursAgo', hoursAgo),
+      params: new HttpParams().set('hoursAgo', hoursAgo).set('at', at ?? new Date().toISOString()),
     });
   }
 

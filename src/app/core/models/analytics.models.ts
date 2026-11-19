@@ -21,6 +21,7 @@ export interface CustomMetricRule {
 export interface DynamicAnalyticsRequest {
   agentId: string;
   hoursAgo: number;
+  at?: string;
   groupingInterval: AnalyticsGroupingInterval;
   rules: CustomMetricRule[];
 }

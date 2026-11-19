@@ -230,6 +230,7 @@ const ukrainian: Record<string, string> = {
   'Agent': 'Агент',
   'Timeline (UTC)': 'Часова шкала (UTC)',
   'Selected:': 'Вибрано:',
+  'Dashboard analytics covers up to 24 hours before the selected time.': 'Аналітика панелі охоплює до 24 годин перед вибраним часом.',
   'Loading available data...': 'Завантаження доступних даних...',
   'Select a metric timestamp': 'Виберіть час метрики',
   'Loading analytics...': 'Завантаження аналітики...',

@@ -41,7 +41,7 @@ export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, After
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly platformId = inject(PLATFORM_ID);
-  private readonly agentRequests = new Subject<string>();
+  private readonly agentRequests = new Subject<{ agentId: string; at: number } | null>();
   private readonly cancelCustomRequest = new Subject<void>();
   private readonly snapshotRequests = new Subject<{ agentId: string; at: number } | null>();
   private readonly rangeRequests = new Subject<string>();
@@ -108,7 +108,9 @@ export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, After
 
     this.agentRequests
       .pipe(
-        tap(() => {
+        auditTime(150),
+        tap((request) => {
+          if (!request) return;
           this.loading.set(true);
           this.error.set('');
           this.data.set(null);
@@ -117,14 +119,16 @@ export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, After
           this.cancelCustomRequest.next();
           this.destroyCharts();
         }),
-        switchMap((agentId) => {
-          if (!agentId) return of(null);
+        switchMap((request) => {
+          if (!request) return of(null);
+          const { agentId } = request;
+          const at = new Date(request.at).toISOString();
           return forkJoin({
-            peaks: this.api.getPeaks(agentId, 1),
-            networkTrends: this.api.getNetworkTrends(agentId, 24),
-            diskConsumption: this.api.getDiskConsumption(agentId, 1),
-            healthScore: this.api.getHealthScore(agentId, 24),
-            anomalies: this.api.getAnomalies(agentId, 24),
+            peaks: this.api.getPeaks(agentId, 1, at),
+            networkTrends: this.api.getNetworkTrends(agentId, 24, at),
+            diskConsumption: this.api.getDiskConsumption(agentId, 1, at),
+            healthScore: this.api.getHealthScore(agentId, 24, at),
+            anomalies: this.api.getAnomalies(agentId, 24, at),
           }).pipe(
             catchError((error: unknown) => {
               this.error.set(requestError(error, 'Could not load analytics for this agent.'));
@@ -192,7 +196,10 @@ export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, After
         this.timePosition.set(1000);
         this.selectedTimestamp.set(end);
         const agentId = this.selectedAgentId();
-        if (agentId) this.snapshotRequests.next({ agentId, at: end });
+        if (agentId) {
+          this.snapshotRequests.next({ agentId, at: end });
+          this.agentRequests.next({ agentId, at: end });
+        }
       });
 
     this.route.queryParamMap
@@ -217,7 +224,7 @@ export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, After
           this.timeRangeLoading.set(false);
           this.customPoints.set([]);
           this.customError.set('');
-          this.agentRequests.next('');
+          this.agentRequests.next(null);
           this.cancelCustomRequest.next();
           this.destroyCharts();
         }),
@@ -277,6 +284,7 @@ export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, After
     const request: DynamicAnalyticsRequest = {
       agentId,
       hoursAgo: this.customHours(),
+      at: new Date(this.selectedTimestamp()).toISOString(),
       groupingInterval: this.customGrouping(),
       rules: this.customRules().filter((rule) => rule.metricName.trim() && rule.alias.trim()),
     };
@@ -313,7 +321,10 @@ export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, After
     const at = this.timelineStart() + (rangeMs * position / 1000);
     this.selectedTimestamp.set(at);
     const agentId = this.selectedAgentId();
-    if (agentId) this.snapshotRequests.next({ agentId, at });
+    if (agentId) {
+      this.snapshotRequests.next({ agentId, at });
+      this.agentRequests.next({ agentId, at });
+    }
   }
 
   oldestTimestamp(): number {
@@ -360,7 +371,10 @@ export class AnalyticsDashboardComponent implements OnInit, AfterViewInit, After
     }
     if (changed) {
       this.cancelCustomRequest.next();
-      this.agentRequests.next(agentId);
+      this.agentRequests.next(null);
+      this.loading.set(true);
+      this.data.set(null);
+      this.destroyCharts();
       this.snapshot.set(null);
       this.snapshotError.set('');
       this.snapshotRequests.next(null);

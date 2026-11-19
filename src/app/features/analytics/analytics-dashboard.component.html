@@ -21,7 +21,7 @@
 @if (selectedAgentId()) {
   <section class="panel timeline-control">
     <div class="section-heading">
-      <div><h2>{{ i18n.t('Timeline (UTC)') }}</h2><p>{{ i18n.t('Selected:') }} {{ i18n.formatDate(selectedTimestamp(), 'full', true) }}</p></div>
+      <div><h2>{{ i18n.t('Timeline (UTC)') }}</h2><p>{{ i18n.t('Selected:') }} {{ i18n.formatDate(selectedTimestamp(), 'full', true) }}</p><p>{{ i18n.t('Dashboard analytics covers up to 24 hours before the selected time.') }}</p></div>
       @if (timeRangeLoading()) { <span class="muted">{{ i18n.t('Loading available data...') }}</span> }
     </div>
     <label class="time-picker">
