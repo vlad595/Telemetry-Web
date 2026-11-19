@@ -1,14 +1,16 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
+  AnalyticsGroupingInterval,
   AnomalyDto,
   DailyPeakDto,
   HourlyPeakDto,
   DiskConsumptionDto,
   DynamicAnalyticsRequest,
   HealthScoreDto,
+  MetricAggregation,
   NetworkTrendDto,
   MetricTimelinePoint,
   MetricSnapshot,
@@ -27,9 +29,36 @@ export class AnalyticsService {
   }
 
   getPreviousDayPeaks(agentId: string, at: string): Observable<HourlyPeakDto[]> {
+    const selected = new Date(at);
+    const end = Date.UTC(selected.getUTCFullYear(), selected.getUTCMonth(), selected.getUTCDate());
+    const start = end - 24 * 60 * 60 * 1000;
     return this.http.get<HourlyPeakDto[]>(`${this.baseUrl}/agent/${encodeURIComponent(agentId)}/previous-day-peaks`, {
       params: new HttpParams().set('at', at),
-    });
+    }).pipe(catchError((error: unknown) => {
+      if (!(error instanceof HttpErrorResponse) || error.status !== 404) return throwError(() => error);
+
+      return this.getCustom({
+        agentId,
+        hoursAgo: 24,
+        at: new Date(end).toISOString(),
+        groupingInterval: AnalyticsGroupingInterval.Hour,
+        rules: [
+          { metricName: 'CpuUsage', aggregation: MetricAggregation.P95, alias: 'P95Cpu' },
+          { metricName: 'MemoryUsage', aggregation: MetricAggregation.P95, alias: 'P95Memory' },
+        ],
+      }).pipe(map((rows) => rows.map((row) => {
+        const rawPeriod = String(readIgnoreCase(row, 'Period') ?? '');
+        const period = /(?:Z|[+-]\d{2}:\d{2})$/i.test(rawPeriod) ? rawPeriod : `${rawPeriod}Z`;
+        return {
+          period,
+          p95Cpu: Number(readIgnoreCase(row, 'P95Cpu')),
+          p95Memory: Number(readIgnoreCase(row, 'P95Memory')),
+        };
+      }).filter((peak) => {
+        const time = Date.parse(peak.period);
+        return time >= start && time < end && Number.isFinite(peak.p95Cpu) && Number.isFinite(peak.p95Memory);
+      })));
+    }));
   }
 
   getNetworkTrends(agentId: string, hoursAgo = 24, at?: string): Observable<NetworkTrendDto[]> {
@@ -75,4 +104,9 @@ export class AnalyticsService {
   getCustom(request: DynamicAnalyticsRequest): Observable<Record<string, unknown>[]> {
     return this.http.post<Record<string, unknown>[]>(`${this.baseUrl}/custom`, request);
   }
+}
+
+function readIgnoreCase(row: Record<string, unknown>, key: string): unknown {
+  const match = Object.keys(row).find((name) => name.toLowerCase() === key.toLowerCase());
+  return match ? row[match] : undefined;
 }
