@@ -147,7 +147,12 @@
     <div class="rules-list">
       @for (rule of customRules(); track $index; let i = $index) {
         <div class="rule-row">
-          <label>{{ i18n.t('Metric name') }}<input [value]="rule.metricName" [placeholder]="i18n.t('e.g. CpuUsage')" (input)="updateRule(i, 'metricName', $event)" /></label>
+          <label>{{ i18n.t('Metric name') }}
+            <select [value]="rule.metricName" (change)="updateRule(i, 'metricName', $event)">
+              <option value="" disabled>{{ i18n.t('Select a metric') }}</option>
+              @for (option of metricOptions; track option.value) { <option [value]="option.value">{{ i18n.t(option.label) }}</option> }
+            </select>
+          </label>
           <label>{{ i18n.t('Aggregation') }}
             <select [value]="rule.aggregation" (change)="updateRule(i, 'aggregation', $event)">
               @for (option of aggregationOptions; track option.value) { <option [value]="option.value">{{ i18n.t(option.label) }}</option> }

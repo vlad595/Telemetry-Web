@@ -268,6 +268,7 @@ const ukrainian: Record<string, string> = {
   'Metric rules': 'Правила метрик',
   'Add metric': 'Додати метрику',
   'Metric name': 'Назва метрики',
+  'Select a metric': 'Виберіть метрику',
   'Aggregation': 'Агрегація',
   'Result alias': 'Назва результату',
   'Remove metric': 'Видалити метрику',

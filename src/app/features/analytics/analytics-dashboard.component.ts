@@ -71,6 +71,13 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
     { metricName: 'MemoryUsage', aggregation: MetricAggregation.Avg, alias: 'AverageRAM' },
     { metricName: 'CpuUsage', aggregation: MetricAggregation.P95, alias: 'PeakCPU' },
   ]);
+  readonly metricOptions = [
+    { value: 'CpuUsage', label: 'CPU usage' },
+    { value: 'MemoryUsage', label: 'Memory usage' },
+    { value: 'DiskSpace', label: 'Disk space' },
+    { value: 'NetworkRxBytes', label: 'Network received' },
+    { value: 'NetworkTxBytes', label: 'Network sent' },
+  ];
   readonly groupingOptions = [
     { value: AnalyticsGroupingInterval.Min, label: 'Minute' },
     { value: AnalyticsGroupingInterval.FiveMinutes, label: '5 minutes' },
