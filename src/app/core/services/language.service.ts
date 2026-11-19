@@ -364,7 +364,7 @@ const ukrainian: Record<string, string> = {
   'Downgrade to this plan': 'Знизити до цього тарифу',
   'Workspace created.': 'Робочий простір створено.',
   'The request failed. Please try again.': 'Запит не виконано. Спробуйте ще раз.',
-  'Telemetry home': 'Головна Telemetry',
+  'Open Telemetry home': 'Головна Open Telemetry',
   'Authentication': 'Автентифікація',
   'Main navigation': 'Основна навігація',
   'Daily P95 CPU and memory line chart': 'Лінійний графік денного P95 CPU та пам’яті',

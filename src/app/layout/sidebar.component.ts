@@ -10,7 +10,7 @@ import { WorkspaceService } from '../core/services/workspace.service';
   imports: [RouterLink, RouterLinkActive],
   template: `
     <aside class="sidebar">
-      <a class="brand" routerLink="/dashboard">Telemetry</a>
+      <a class="brand" routerLink="/dashboard">Open Telemetry</a>
       <p class="section-label">{{ i18n.t('MENU') }}</p>
       <nav [attr.aria-label]="i18n.t('Main navigation')">
         <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{ i18n.t('Dashboard') }}</a>
