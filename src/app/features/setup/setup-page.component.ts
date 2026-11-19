@@ -12,8 +12,9 @@ import { environment } from '../../../environments/environment';
 type AgentPlatform = 'linux' | 'windows';
 type SetupPhase = 'idle' | 'generated' | 'connecting' | 'waiting' | 'saving' | 'save-error' | 'stream-error' | 'complete';
 
-const AGENT_RELEASE = 'v1.0.5';
-const RELEASE_PAGE = `https://raw.githubusercontent.com/vlad595/TelemetryCollector-Service/main/install.ps1`;
+const WINDOWS_INSTALLER_URL = 'https://raw.githubusercontent.com/vlad595/TelemetryCollector-Service/main/install.ps1';
+const LINUX_INSTALLER_URL = 'https://raw.githubusercontent.com/vlad595/TelemetryCollector-Service/main/install.sh';
+const RELEASE_PAGE = 'https://github.com/vlad595/TelemetryCollector-Service/releases/latest';
 
 @Component({
   selector: 'app-setup-page',
@@ -136,9 +137,9 @@ export class SetupPageComponent implements OnInit, OnDestroy {
 
 function buildInstallCommand(platform: AgentPlatform, apiUrl: string, agentId: string): string {
   if (platform === 'windows') {
-    return buildWindowsCommand(RELEASE_PAGE, apiUrl, agentId);
+    return buildWindowsCommand(WINDOWS_INSTALLER_URL, apiUrl, agentId);
   }
-  return buildLinuxCommand(RELEASE_PAGE, apiUrl, agentId);
+  return buildLinuxCommand(LINUX_INSTALLER_URL, apiUrl, agentId);
 }
 
 function buildWindowsCommand(assetUrl: string, apiUrl: string, agentId: string): string {

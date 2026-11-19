@@ -102,7 +102,7 @@ const ukrainian: Record<string, string> = {
   'Operating system': 'Операційна система',
   'Generate install command': 'Створити команду встановлення',
   'AGENT': 'АГЕНТ',
-  'Install Telemetry Collector v1.0.4': 'Встановити Telemetry Collector v1.0.4',
+  'Install Telemetry Collector': 'Встановити Telemetry Collector',
   'Open release': 'Відкрити реліз',
   'Linux release note:': 'Примітка щодо Linux:',
   'v1.0.4 does not use the supplied Agent ID in its metrics. Automatic setup completion on Linux needs an agent release with stable Agent ID support.': 'Версія v1.0.4 не використовує переданий Agent ID у метриках. Для автоматичного завершення налаштування на Linux потрібен реліз агента з підтримкою сталого Agent ID.',
