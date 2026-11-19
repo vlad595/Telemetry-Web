@@ -6,7 +6,6 @@ export type SiteLanguage = 'en' | 'uk';
 
 const STORAGE_KEY = 'telemetry.language';
 
-// English UI copy is the source text. Unknown strings remain readable in English.
 const ukrainian: Record<string, string> = {
   'MENU': 'МЕНЮ',
   'Dashboard': 'Панель моніторингу',
@@ -330,6 +329,8 @@ const ukrainian: Record<string, string> = {
   'The analytics API returned an invalid metric time range.': 'API аналітики повернуло некоректний часовий діапазон.',
   'Could not load agents.': 'Не вдалося завантажити агентів.',
   'Add at least one metric rule with a metric name and alias.': 'Додайте принаймні одне правило з назвою метрики та назвою результату.',
+  'Result names must start with a letter or underscore and contain only letters, digits, or underscores (up to 64 characters).': 'Назва результату має починатися з літери або підкреслення й містити лише латинські літери, цифри та підкреслення (до 64 символів).',
+  'Result names must be unique; Period is reserved.': 'Назви результатів мають бути унікальними; Period — зарезервована назва.',
   'Custom analytics request failed.': 'Запит власної аналітики не виконано.',
   'Could not load workspaces.': 'Не вдалося завантажити робочі простори.',
   'Could not load workspace details.': 'Не вдалося завантажити дані робочого простору.',
@@ -382,7 +383,6 @@ export class LanguageService {
   readonly language = signal<SiteLanguage>('en');
 
   constructor() {
-    // Restore after hydration so the server and first client render use the same language.
     afterNextRender(() => {
       if (!isPlatformBrowser(this.platformId)) return;
       const stored = this.document.defaultView?.localStorage.getItem(STORAGE_KEY);

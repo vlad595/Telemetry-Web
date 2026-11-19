@@ -54,7 +54,7 @@
     }
 
     @if (phase() === 'connecting') {
-      <p class="progress-message">{{ i18n.t('Connecting to the SignalR group for this Agent ID...') }}</p>
+      <p class="progress-message">{{ i18n.t('Connecting to the Hub group for this Agent ID...') }}</p>
     } @else if (phase() === 'waiting') {
       <p class="progress-message">{{ i18n.t('Connected. Run the command above. The instance will be saved after the first matching metric arrives.') }}</p>
     } @else if (phase() === 'saving') {

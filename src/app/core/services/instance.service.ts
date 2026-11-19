@@ -33,7 +33,6 @@ export class InstanceService {
   }
 
   transferToWorkspace(instanceId: string, workspaceId: string): Observable<Instance> {
-    // Keep the existing API route spelling for compatibility.
     return this.http.patch<Instance>(
       `${this.baseUrl}/api/instance/${encodeURIComponent(instanceId)}/transfer/toWorkspacer=${encodeURIComponent(workspaceId)}`,
       null,

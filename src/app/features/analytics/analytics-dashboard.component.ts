@@ -288,18 +288,30 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
     this.customChart?.destroy();
     this.customChart = undefined;
 
+    const rules = this.customRules().map((rule) => ({ ...rule, metricName: rule.metricName.trim(), alias: rule.alias.trim() }));
+    if (!rules.length || rules.some((rule) => !rule.metricName || !rule.alias)) {
+      this.customError.set('Add at least one metric rule with a metric name and alias.');
+      this.customLoading.set(false);
+      return;
+    }
+    if (rules.some((rule) => rule.alias.length > 64 || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(rule.alias))) {
+      this.customError.set('Result names must start with a letter or underscore and contain only letters, digits, or underscores (up to 64 characters).');
+      this.customLoading.set(false);
+      return;
+    }
+    const aliases = rules.map((rule) => rule.alias.toLowerCase());
+    if (aliases.includes('period') || new Set(aliases).size !== aliases.length) {
+      this.customError.set('Result names must be unique; Period is reserved.');
+      this.customLoading.set(false);
+      return;
+    }
     const request: DynamicAnalyticsRequest = {
       agentId,
       hoursAgo: this.customHours(),
       at: new Date(this.selectedTimestamp()).toISOString(),
       groupingInterval: this.customGrouping(),
-      rules: this.customRules().filter((rule) => rule.metricName.trim() && rule.alias.trim()),
+      rules,
     };
-    if (!request.rules.length) {
-      this.customError.set('Add at least one metric rule with a metric name and alias.');
-      this.customLoading.set(false);
-      return;
-    }
     this.api.getCustom(request)
       .pipe(
         map((rows) => rows.map((row) => ({
